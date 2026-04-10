@@ -442,6 +442,10 @@ function showToast(msg, ok) {
     if (ok === undefined) ok = true;
     var t = document.getElementById('toast');
     t.style.background = ok ? '#2d6a4f' : '#dc2626';
+    // Исправлено: извлекаем сообщение из объекта
+    if (typeof msg === 'object') {
+        msg = msg.detail || msg.message || JSON.stringify(msg);
+    }
     t.textContent = msg;
     t.style.display = 'block';
     setTimeout(function() { t.style.display = 'none'; }, 3000);
@@ -591,56 +595,84 @@ async function registerUser() {
     var email = document.getElementById('regEmail').value.trim();
     var password = document.getElementById('regPassword').value;
     var role = document.getElementById('regRole').value;
-    if (!email || !password) { showToast('Email и пароль обязательны', false); return; }
+    
+    if (!email || !password) {
+        showToast('Email и пароль обязательны', false);
+        return;
+    }
+    
     try {
         var r = await fetch(API_URL + '/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email, password: password, name: email.split('@')[0], role: role })
+            body: JSON.stringify({ 
+                email: email, 
+                password: password, 
+                name: email.split('@')[0], 
+                role: role 
+            })
         });
+        
         var d = await r.json();
-        if (r.status === 201 || d.message) {
+        
+        if (r.status === 201 || d.success) {
             showToast('Регистрация успешна!');
             closeModal('registerModal');
             openModal('loginModal');
         } else {
-            showToast(d.detail || d.message || 'Ошибка регистрации', false);
+            var errorMsg = d.detail || d.message || 'Ошибка регистрации';
+            showToast(errorMsg, false);
         }
-    } catch(e) { showToast('Ошибка соединения с сервером', false); }
+    } catch(e) {
+        console.error('Register error:', e);
+        showToast('Ошибка соединения с сервером', false);
+    }
 }
 
 async function loginUser() {
     var email = document.getElementById('loginEmail').value.trim();
     var password = document.getElementById('loginPassword').value;
-    if (!email || !password) { showToast('Введите email и пароль', false); return; }
+    
+    if (!email || !password) {
+        showToast('Введите email и пароль', false);
+        return;
+    }
+    
     try {
         var r = await fetch(API_URL + '/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: email, password: password })
         });
+        
         var d = await r.json();
-        if (r.ok && (d.access_token || d.token)) {
-            var token = d.access_token || d.token;
-            localStorage.setItem('token', token);
+        
+        if (r.ok && d.token) {
+            localStorage.setItem('token', d.token);
             localStorage.setItem('userEmail', email);
-            localStorage.setItem('userRole', (d.user && d.user.role) || d.role || 'volunteer');
+            localStorage.setItem('userRole', (d.user && d.user.role) || 'volunteer');
             showToast('Вход выполнен!');
             closeModal('loginModal');
             await checkAuth();
         } else {
-            showToast(d.detail || d.message || 'Неверный email или пароль', false);
+            var errorMsg = d.detail || d.message || 'Неверный email или пароль';
+            showToast(errorMsg, false);
         }
-    } catch(e) { showToast('Ошибка соединения с сервером', false); }
+    } catch(e) {
+        console.error('Login error:', e);
+        showToast('Ошибка соединения с сервером', false);
+    }
 }
 
 async function checkAuth() {
     var token = getToken();
     var email = localStorage.getItem('userEmail');
     var role = localStorage.getItem('userRole');
+    
     if (token && email) {
         currentUser = { email: email, role: role };
         updateUI();
+        
         if (role === 'curator' || role === 'organizer' || role === 'admin') {
             document.getElementById('curatorPanel').style.display = 'block';
             loadApplications();
@@ -649,11 +681,13 @@ async function checkAuth() {
             startReportsPolling();
             startTaskAppsPolling();
         }
-    } else {
-        currentUser = null;
-        updateUI();
-        document.getElementById('curatorPanel').style.display = 'none';
+        return true;
     }
+    
+    currentUser = null;
+    updateUI();
+    document.getElementById('curatorPanel').style.display = 'none';
+    return false;
 }
 
 function updateUI() {
@@ -661,6 +695,7 @@ function updateUI() {
     var userDiv = document.getElementById('userMenu');
     var emailEl = document.getElementById('userEmailDisplay');
     var badgeEl = document.getElementById('userRoleBadge');
+    
     if (currentUser) {
         authDiv.style.display = 'none';
         userDiv.style.display = 'block';
