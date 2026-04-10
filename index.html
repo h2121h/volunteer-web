@@ -103,7 +103,7 @@
         .app-item:hover { background: #faf5ff; }
         .app-info h4 { font-size: 16px; margin-bottom: 4px; }
         .app-info small { color: #6b7280; }
-        .app-actions { display: flex; gap: 8px; }
+        .app-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         .status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
         .status-pending { background: #fff3cd; color: #856404; }
         .status-approved { background: #d1e7dd; color: #0a3622; }
@@ -116,8 +116,27 @@
         .analytics-card { background: #f8fafc; border-radius: 16px; padding: 20px; text-align: center; }
         .analytics-number { font-size: 32px; font-weight: 800; color: #9c27b0; }
         .analytics-label { color: #6b7280; font-size: 14px; margin-top: 4px; }
-        .doc-item { display: flex; justify-content: space-between; align-items: center; padding: 14px; border: 1px solid #eef2f6; border-radius: 12px; margin-bottom: 10px; }
-@media (max-width: 768px) {
+.doc-item { display: flex; justify-content: space-between; align-items: center; padding: 14px; border: 1px solid #eef2f6; border-radius: 12px; margin-bottom: 10px; }
+
+        /* ── TASK APPLICATIONS (new) ── */
+        .task-app-item { background: #fff; border: 1px solid #e8f5e9; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+        .task-app-item:hover { background: #f0fdf4; }
+        .task-app-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+        .task-app-title { font-size: 16px; font-weight: 700; color: #1e2f3a; margin-bottom: 4px; }
+        .task-app-meta { font-size: 13px; color: #6b7280; }
+        .task-app-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .badge-count { background: #9c27b0; color: white; border-radius: 20px; padding: 2px 10px; font-size: 12px; font-weight: 700; }
+        .volunteer-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 10px; background: #f8f9fa; margin-top: 8px; flex-wrap: wrap; gap: 8px; }
+        .volunteer-row:hover { background: #e8f5e9; }
+        .volunteer-name { font-weight: 600; font-size: 14px; }
+        .volunteer-meta { font-size: 12px; color: #6b7280; margin-top: 2px; }
+        .task-toggle-btn { background: none; border: none; color: #9c27b0; font-weight: 600; font-size: 13px; cursor: pointer; padding: 4px 10px; border-radius: 20px; transition: background 0.2s; }
+        .task-toggle-btn:hover { background: #f3e5f5; }
+        .volunteers-list { display: none; margin-top: 8px; }
+        .volunteers-list.open { display: block; }
+        .empty-state { text-align: center; padding: 30px; color: #6b7280; font-size: 15px; }
+
+        @media (max-width: 768px) {
             .hero h1 { font-size: 32px; }
             .filters-grid { flex-direction: column; }
             .stats-grid { grid-template-columns: 1fr; }
@@ -177,7 +196,6 @@
         </div>
     </div>
 </div>
-
 <div class="modal" id="projectDetailsModal">
     <div class="modal-content project-detail-modal">
         <h3 id="projectDetailTitle">Информация о проекте</h3>
@@ -214,6 +232,7 @@
         </div>
     </div>
 </nav>
+
 <!-- ── HERO ── -->
 <section class="hero">
     <div class="container">
@@ -244,16 +263,17 @@
     </div>
 </div>
 
-<!-- ── CURATOR PANEL (показывается только для curator) ── -->
+<!-- ── CURATOR PANEL ── -->
 <div class="container">
     <div class="curator-panel" id="curatorPanel">
         <h2>⭐️ Панель куратора</h2>
         <div class="curator-tabs">
-            <button class="curator-tab active" onclick="showCuratorTab('applications')">📋 Заявки</button>
-            <button class="curator-tab" onclick="showCuratorTab('reports')">📄 Отчёты</button>
-            <button class="curator-tab" onclick="showCuratorTab('checkins')">✅ Явка</button>
-            <button class="curator-tab" onclick="showCuratorTab('documents')">📁 Документы</button>
-            <button class="curator-tab" onclick="showCuratorTab('analytics')">📊 Аналитика</button>
+            <button class="curator-tab active" onclick="showCuratorTab('applications', this)">📋 Заявки</button>
+            <button class="curator-tab" onclick="showCuratorTab('task-applications', this)">✅ На задачи</button>
+            <button class="curator-tab" onclick="showCuratorTab('reports', this)">📄 Отчёты</button>
+            <button class="curator-tab" onclick="showCuratorTab('checkins', this)">📍 Явка</button>
+            <button class="curator-tab" onclick="showCuratorTab('documents', this)">📁 Документы</button>
+            <button class="curator-tab" onclick="showCuratorTab('analytics', this)">📊 Аналитика</button>
         </div>
 
         <!-- Заявки (UC-12) -->
@@ -262,8 +282,19 @@
             <button class="btn-filter" onclick="loadApplications()" style="margin-bottom:16px;">🔄 Обновить</button>
             <div id="applicationsList"><p style="color:#6b7280;">Загрузка...</p></div>
         </div>
+<!-- Заявки на задачи — НОВАЯ ВКЛАДКА -->
+        <div class="curator-section" id="section-task-applications">
+            <h3 style="margin-bottom:6px;">Заявки на участие в задачах</h3>
+            <p style="color:#6b7280;font-size:14px;margin-bottom:16px;">Волонтёры записались через мобильное приложение — одобрите или отклоните</p>
+            <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+                <button class="btn-filter active" onclick="loadTaskApplications('pending', this)">⏳ Ожидают</button>
+                <button class="btn-filter" onclick="loadTaskApplications('approved', this)">✅ Одобренные</button>
+                <button class="btn-filter" onclick="loadTaskApplications('all', this)">Все</button>
+            </div>
+            <div id="taskApplicationsList"><p style="color:#6b7280;">Загрузка...</p></div>
+        </div>
 
-        <!-- Отчёты (UC-12) -->
+        <!-- Отчёты -->
         <div class="curator-section" id="section-reports">
             <h3 style="margin-bottom:16px;">Отчёты на проверке</h3>
             <p style="color:#6b7280;margin-bottom:16px;font-size:14px;">BR-03: 72ч на проверку — иначе автоодобрение</p>
@@ -271,7 +302,7 @@
             <div id="reportsList"><p style="color:#6b7280;">Загрузка...</p></div>
         </div>
 
-        <!-- Явка (UC-14) -->
+        <!-- Явка -->
         <div class="curator-section" id="section-checkins">
             <h3 style="margin-bottom:16px;">Мониторинг явки (реальное время)</h3>
             <p style="color:#6b7280;margin-bottom:16px;font-size:14px;">Данные обновляются каждые 10 секунд</p>
@@ -279,27 +310,27 @@
             <div id="checkinsList"><p style="color:#6b7280;">Загрузка...</p></div>
         </div>
 
-        <!-- Документы (UC-16) -->
+        <!-- Документы -->
         <div class="curator-section" id="section-documents">
             <h3 style="margin-bottom:16px;">Верификация документов</h3>
             <button class="btn-filter" onclick="loadDocuments()" style="margin-bottom:16px;">🔄 Обновить</button>
             <div id="documentsList"><p style="color:#6b7280;">Загрузка...</p></div>
         </div>
 
-        <!-- Аналитика (UC-18) -->
+        <!-- Аналитика -->
         <div class="curator-section" id="section-analytics">
             <h3 style="margin-bottom:16px;">Аналитика платформы</h3>
-            <button class="btn-filter" onclick="loadAnalytics()" style="margin-bottom:16px;">🔄 Загрузить</button>
+            <button class="btn-filter" onclick="loadAnalytics()" style="margin-bottom:16px;">📊 Загрузить</button>
             <div class="analytics-grid" id="analyticsGrid"></div>
         </div>
     </div>
 </div>
+
 <!-- ── PROJECTS ── -->
 <div class="container">
     <div class="section-title">🔥 Активные проекты</div>
     <div class="projects-grid" id="projectsGrid"></div>
 </div>
-
 <!-- ── TASKS ── -->
 <div class="container">
     <div class="section-title">📅 Ближайшие задачи</div>
@@ -369,19 +400,20 @@
         <hr><p class="copyright">© 2025 Добрый Город · Вместе мы можем больше</p>
     </div>
 </footer>
+
 <script>
 const API_URL = 'https://volunteer-api-5oq5.onrender.com';
 let currentUser = null;
 let projectsList = [];
 let tasksList = [];
 let checkinInterval = null;
-let reportsInterval  = null;
-
+let reportsInterval = null;
+let taskAppsInterval = null;
 const roleNames = {
-    volunteer: { name: "Волонтёр", class: "role-volunteer" },
-    organizer: { name: "Организатор", class: "role-organizer" },
-    curator:   { name: "Куратор",    class: "role-curator" },
-    admin:     { name: "Администратор", class: "role-admin" }
+    volunteer: { name: 'Волонтёр',      cls: 'role-volunteer' },
+    organizer: { name: 'Организатор',   cls: 'role-organizer' },
+    curator:   { name: 'Куратор',       cls: 'role-curator' },
+    admin:     { name: 'Администратор', cls: 'role-admin' }
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -390,21 +422,23 @@ function getToken() { return localStorage.getItem('token'); }
 
 function authHeaders() {
     const t = getToken();
-    return t ? { 'Content-Type': 'application/json', 'Authorization': Bearer ${t} }
-             : { 'Content-Type': 'application/json' };
+    const h = { 'Content-Type': 'application/json' };
+    if (t) h['Authorization'] = 'Bearer ' + t;
+    return h;
 }
 
 function escapeHtml(str) {
     if (!str) return '';
-    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 
-function showToast(msg, ok = true) {
+function showToast(msg, ok) {
+    if (ok === undefined) ok = true;
     const t = document.getElementById('toast');
     t.style.background = ok ? '#2d6a4f' : '#dc2626';
     t.textContent = msg;
     t.style.display = 'block';
-    setTimeout(() => t.style.display = 'none', 3000);
+    setTimeout(function() { t.style.display = 'none'; }, 3000);
 }
 
 function openModal(id)  { document.getElementById(id).style.display = 'flex'; }
@@ -417,13 +451,13 @@ function showNotification(title, msg) {
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     checkAuth();
     loadProjects();
     loadTasks();
     loadStats();
     document.getElementById('distanceSlider').addEventListener('input', function() {
-        document.getElementById('distanceValue').textContent = до ${this.value} км;
+        document.getElementById('distanceValue').textContent = 'до ' + this.value + ' км';
     });
 });
 
@@ -431,11 +465,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadStats() {
     try {
-        const r = await fetch(${API_URL}/api/stats);
+        const r = await fetch(API_URL + '/api/stats');
         const d = await r.json();
         document.getElementById('volunteersCount').textContent = d.volunteers_count  0;
-        document.getElementById('tasksCompleted').textContent  = d.tasks_completed   d.completed_tasks  0;
-        document.getElementById('projectsCount').textContent   = d.projects_count    0;
+        document.getElementById('tasksCompleted').textContent  = d.tasks_completed  d.completed_tasks  0;
+        document.getElementById('projectsCount').textContent   = d.projects_count  0;
     } catch(e) { console.error('Stats error:', e); }
 }
 
@@ -443,7 +477,7 @@ async function loadStats() {
 
 async function loadProjects() {
     try {
-        const r = await fetch(${API_URL}/api/projects);
+        const r = await fetch(API_URL + '/api/projects');
         projectsList = await r.json();
         if (!Array.isArray(projectsList)) projectsList = [];
         renderProjects();
@@ -455,30 +489,30 @@ function renderProjects() {
         c.innerHTML = '<div class="card"><div class="card-content">Проектов пока нет</div></div>';
         return;
     }
-    c.innerHTML = projectsList.map(p => `
-        <div class="card">
-            <div class="card-img">🤝</div>
-            <div class="card-content">
-                <h4 class="card-title">${escapeHtml(p.title  'Проект')}</h4>
-                <p class="card-text">${escapeHtml(p.description  'Описание проекта')}</p>
-                <div class="card-meta"><span>📅 ${p.status  'активен'}</span></div>
-                <button class="btn-card" onclick="showProjectDetails(${p.id})">Подробнее</button>
-            </div>
-        </div>`).join('');
+    c.innerHTML = projectsList.map(function(p) {
+        return '<div class="card">' +
+            '<div class="card-img">🤝</div>' +
+            '<div class="card-content">' +
+            '<h4 class="card-title">' + escapeHtml(p.title  'Проект') + '</h4>' +
+            '<p class="card-text">' + escapeHtml(p.description  'Описание проекта') + '</p>' +
+            '<div class="card-meta"><span>📅 ' + escapeHtml(p.status  'активен') + '</span></div>' +
+            '<button class="btn-card" onclick="showProjectDetails(' + p.id + ')">Подробнее</button>' +
+            '</div></div>';
+    }).join('');
 }
 
 function renderProjectsFallback() {
     const c = document.getElementById('projectsGrid');
-    if (!c.innerHTML) c.innerHTML = `
-        <div class="card"><div class="card-img">🏥</div><div class="card-content"><h4 class="card-title">Помощь больницам</h4><p class="card-text">Поддержка медицинских учреждений</p><button class="btn-card" onclick="showNotification('Информация','Проект в разработке')">Подробнее</button></div></div>
-        <div class="card"><div class="card-img">🌳</div><div class="card-content"><h4 class="card-title">Зелёный город</h4><p class="card-text">Озеленение парков</p><button class="btn-card" onclick="showNotification('Информация','Проект в разработке')">Подробнее</button></div></div>`;
+    if (!c.innerHTML) c.innerHTML =
+        '<div class="card"><div class="card-img">🏥</div><div class="card-content"><h4 class="card-title">Помощь больницам</h4><p class="card-text">Поддержка медицинских учреждений</p><button class="btn-card" onclick="showNotification(\'Информация\',\'Проект в разработке\')">Подробнее</button></div></div>' +
+        '<div class="card"><div class="card-img">🌳</div><div class="card-content"><h4 class="card-title">Зелёный город</h4><p class="card-text">Озеленение парков</p><button class="btn-card" onclick="showNotification(\'Информация\',\'Проект в разработке\')">Подробнее</button></div></div>';
 }
 
 // ── Tasks ─────────────────────────────────────────────────────────────────────
 
 async function loadTasks() {
     try {
-        const r = await fetch(`${API_URL}/api/tasks`);
+        const r = await fetch(API_URL + '/api/tasks');
         tasksList = await r.json();
         if (!Array.isArray(tasksList)) tasksList = [];
         renderTasksList();
@@ -486,46 +520,51 @@ async function loadTasks() {
 }
 
 function renderTasksList() {
-    const category    = document.getElementById('filterCategory')?.value  'all';
-    const load        = document.getElementById('filterLoad')?.value  'all';
-    const when        = document.getElementById('filterWhen')?.value  'all';
-    const today       = new Date().toISOString().slice(0,10);
-    const weekLater   = new Date(); weekLater.setDate(weekLater.getDate()+7);
-    const weekLaterStr = weekLater.toISOString().slice(0,10);
+    const category  = document.getElementById('filterCategory').value  'all';
+    const load      = document.getElementById('filterLoad').value  'all';
+    const when      = document.getElementById('filterWhen').value  'all';
+    const today     = new Date().toISOString().slice(0,10);
+    const weekLater = new Date(); weekLater.setDate(weekLater.getDate() + 7);
+    const weekStr   = weekLater.toISOString().slice(0,10);
 
-    let filtered = tasksList.filter(t => {
+    const filtered = tasksList.filter(function(t) {
         if (category !== 'all' && t.category !== category) return false;
         if (load     !== 'all' && t.load     !== load)     return false;
         if (when === 'today' && t.event_date !== today)    return false;
-        if (when === 'week'  && (t.event_date < today  t.event_date > weekLaterStr)) return false;
+        if (when === 'week'  && (t.event_date < today  t.event_date > weekStr)) return false;
         return true;
     });
 
     const c = document.getElementById('tasksList');
-    if (!filtered.length) { c.innerHTML = '<div class="no-tasks">😕 Задачи не найдены. Попробуйте изменить фильтры.</div>'; return; }
-    c.innerHTML = filtered.map(t => `
-        <div class="task-item">
-            <div class="task-info">
-                <h4>${escapeHtml(t.title  'Задача')}</h4>
-                <small>📅 ${t.event_date  'Дата не указана'}</small>
-                <small>📍 ${escapeHtml(t.location  'Место не указано')}</small>
-                <div class="task-tags"><span class="task-tag">👥 ${t.needed_people  5} чел.</span></div>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center;">
-                <span class="task-badge">нужно ${t.needed_people  5} чел.</span>
-                <button class="btn-card-small" onclick="joinTask(${t.id})">Записаться</button>
-            </div>
-        </div>`).join('');
+    if (!filtered.length) {
+        c.innerHTML = '<div class="no-tasks">😕 Задачи не найдены. Попробуйте изменить фильтры.</div>';
+        return;
+    }
+    c.innerHTML = filtered.map(function(t) {
+        return '<div class="task-item">' +
+            '<div class="task-info">' +
+            '<h4>' + escapeHtml(t.title  'Задача') + '</h4>' +
+            '<small>📅 ' + escapeHtml(t.event_date  'Дата не указана') + '</small>' +
+            '<small>📍 ' + escapeHtml(t.location  'Место не указано') + '</small>' +
+            '<div><span class="task-tag">👥 ' + (t.needed_people  5) + ' чел.</span></div>' +
+            '</div>' +
+            '<div style="display:flex;gap:8px;align-items:center;">' +
+            '<span class="task-badge">нужно ' + (t.needed_people  5) + ' чел.</span>' +
+            '<button class="btn-card-small" onclick="joinTask(' + t.id + ')">Записаться</button>' +
+            '</div></div>';
+    }).join('');
 }
-
 function renderTasksFallback() {
     const c = document.getElementById('tasksList');
-    if (!c.innerHTML) c.innerHTML = `
-        <div class="task-item"><div class="task-info"><h4>Субботник в парке</h4><small>📅 Завтра</small><small>📍 Центральный парк</small></div><div><button class="btn-card-small" onclick="showNotification('Запись','Войдите в систему')">Записаться</button></div></div>`;
+    if (!c.innerHTML) c.innerHTML =
+        '<div class="task-item"><div class="task-info"><h4>Субботник в парке</h4><small>📅 Завтра</small><small>📍 Центральный парк</small></div><div><button class="btn-card-small" onclick="showNotification(\'Запись\',\'Войдите в систему\')">Записаться</button></div></div>';
 }
+
 function applyFilters()  { renderTasksList(); }
 function resetFilters() {
-    ['filterCategory','filterLoad','filterWhen'].forEach(id => document.getElementById(id).value = 'all');
+    ['filterCategory','filterLoad','filterWhen'].forEach(function(id) {
+        document.getElementById(id).value = 'all';
+    });
     document.getElementById('distanceSlider').value = '50';
     document.getElementById('distanceValue').textContent = 'до 50 км';
     renderTasksList();
@@ -539,7 +578,7 @@ async function registerUser() {
     const role     = document.getElementById('regRole').value;
     if (!email  !password) { showToast('Email и пароль обязательны', false); return; }
     try {
-        const r = await fetch(`${API_URL}/auth/register`, {
+        const r = await fetch(API_URL + '/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password, name: email.split('@')[0], role })
@@ -560,17 +599,17 @@ async function loginUser() {
     const password = document.getElementById('loginPassword').value;
     if (!email  !password) { showToast('Введите email и пароль', false); return; }
     try {
-        const r = await fetch(`${API_URL}/api/login`, {
+        const r = await fetch(API_URL + '/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
         const d = await r.json();
         if (r.ok && (d.access_token  d.token)) {
-            const token = d.access_token  d.token;
+const token = d.access_token  d.token;
             localStorage.setItem('token', token);
             localStorage.setItem('userEmail', email);
-            localStorage.setItem('userRole', d.user?.role  d.role  'volunteer');
+            localStorage.setItem('userRole', (d.user && d.user.role)  d.role  'volunteer');
             showToast('Вход выполнен!');
             closeModal('loginModal');
             await checkAuth();
@@ -590,8 +629,10 @@ async function checkAuth() {
         if (role === 'curator'  role === 'organizer'  role === 'admin') {
             document.getElementById('curatorPanel').style.display = 'block';
             loadApplications();
+            loadTaskApplications('pending', null);
             startCheckinPolling();
             startReportsPolling();
+            startTaskAppsPolling();
         }
     } else {
         currentUser = null;
@@ -601,17 +642,17 @@ async function checkAuth() {
 }
 
 function updateUI() {
-    const authDiv  = document.getElementById('authButtons');
-    const userDiv  = document.getElementById('userMenu');
-    const emailEl  = document.getElementById('userEmailDisplay');
-    const badgeEl  = document.getElementById('userRoleBadge');
+    const authDiv = document.getElementById('authButtons');
+    const userDiv = document.getElementById('userMenu');
+    const emailEl = document.getElementById('userEmailDisplay');
+    const badgeEl = document.getElementById('userRoleBadge');
     if (currentUser) {
         authDiv.style.display = 'none';
         userDiv.style.display = 'block';
         emailEl.textContent   = currentUser.email;
         const ri = roleNames[currentUser.role]  roleNames.volunteer;
         badgeEl.textContent   = ri.name;
-        badgeEl.className     = role-badge ${ri.class};
+        badgeEl.className     = 'role-badge ' + ri.cls;
     } else {
         authDiv.style.display = 'flex';
         userDiv.style.display = 'none';
@@ -623,29 +664,31 @@ function logout() {
     currentUser = null;
     updateUI();
     document.getElementById('curatorPanel').style.display = 'none';
-    if (checkinInterval) clearInterval(checkinInterval);
+    if (checkinInterval)  clearInterval(checkinInterval);
+    if (reportsInterval)  clearInterval(reportsInterval);
+    if (taskAppsInterval) clearInterval(taskAppsInterval);
     showToast('Вы вышли из системы');
 }
-// ── Join task ─────────────────────────────────────────────────────────────────
+
+// ── Join task (public) ────────────────────────────────────────────────────────
 
 function joinTask(taskId) {
     if (!currentUser) { showToast('Сначала войдите в систему', false); openModal('loginModal'); return; }
-    const task = tasksList.find(t => t.id === taskId);
-    document.getElementById('joinTaskId').value   = taskId;
-    document.getElementById('joinTaskInfo').textContent = Записаться на задачу "${task?.title || taskId}"?;
+    const task = tasksList.find(function(t) { return t.id === taskId; });
+    document.getElementById('joinTaskId').value = taskId;
+    document.getElementById('joinTaskInfo').textContent = 'Записаться на задачу "' + (task ? task.title : taskId) + '"?';
     openModal('joinTaskModal');
 }
-
 async function confirmJoinTask() {
     const taskId = document.getElementById('joinTaskId').value;
     try {
-        const r = await fetch(${API_URL}/api/tasks/${taskId}/apply, {
+        const r = await fetch(API_URL + '/api/tasks/' + taskId + '/apply', {
             method: 'POST',
             headers: authHeaders(),
             body: JSON.stringify({ message: 'Хочу помочь!' })
         });
         const d = await r.json();
-        if (d.success || r.ok) { showToast('Вы успешно записаны!'); closeModal('joinTaskModal'); }
+        if (d.success  r.ok) { showToast('Вы успешно записаны!'); closeModal('joinTaskModal'); }
         else showToast(d.message  d.detail  'Ошибка записи', false);
     } catch(e) { showToast('Ошибка соединения', false); }
 }
@@ -653,68 +696,72 @@ async function confirmJoinTask() {
 // ── Project details ───────────────────────────────────────────────────────────
 
 function showProjectDetails(projectId) {
-    const p = projectsList.find(x => x.id === projectId);
-    document.getElementById('projectDetailTitle').textContent = p?.title  'Проект';
-    document.getElementById('projectDetailContent').innerHTML = `<p>${escapeHtml(p?.description  '')}</p>`;
+    const p = projectsList.find(function(x) { return x.id === projectId; });
+    document.getElementById('projectDetailTitle').textContent = p ? p.title : 'Проект';
+    document.getElementById('projectDetailContent').innerHTML = '<p>' + escapeHtml(p ? p.description : '') + '</p>';
     document.getElementById('projectTasksList').innerHTML = '<h4>📋 Задачи:</h4><p>Загрузка...</p>';
     openModal('projectDetailsModal');
-    fetch(${API_URL}/api/tasks?project_id=${projectId})
-        .then(r => r.json())
-        .then(tasks => {
-            if (tasks?.length) {
-                document.getElementById('projectTasksList').innerHTML =
-                    '<h4>📋 Задачи:</h4>' + tasks.map(t =>
-                        <div class="project-task-item"><strong>📌 ${escapeHtml(t.title)}</strong><br><small>${t.event_date||''}</small></div>
-                    ).join('');
+    fetch(API_URL + '/api/tasks?project_id=' + projectId)
+        .then(function(r) { return r.json(); })
+        .then(function(tasks) {
+            if (tasks && tasks.length) {
+                document.getElementById('projectTasksList').innerHTML = '<h4>📋 Задачи:</h4>' +
+                    tasks.map(function(t) {
+                        return '<div class="project-task-item"><strong>📌 ' + escapeHtml(t.title) + '</strong><br><small>' + (t.event_date  '') + '</small></div>';
+                    }).join('');
             } else {
                 document.getElementById('projectTasksList').innerHTML = '<h4>📋 Задачи:</h4><p>Нет активных задач</p>';
             }
-        }).catch(() => {
+        }).catch(function() {
             document.getElementById('projectTasksList').innerHTML = '<h4>📋 Задачи:</h4><p>Нет активных задач</p>';
         });
 }
 
 // ── CURATOR: tabs ─────────────────────────────────────────────────────────────
 
-function showCuratorTab(name) {
-    document.querySelectorAll('.curator-section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.curator-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById(section-${name}).classList.add('active');
-    event.target.classList.add('active');
-    if (name === 'applications') loadApplications();
-    if (name === 'reports')      loadReports();
-    if (name === 'checkins')     loadCheckins();
-    if (name === 'documents')    loadDocuments();
-    if (name === 'analytics')    loadAnalytics();
+function showCuratorTab(name, btn) {
+    document.querySelectorAll('.curator-section').forEach(function(s) { s.classList.remove('active'); });
+    document.querySelectorAll('.curator-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.getElementById('section-' + name).classList.add('active');
+    if (btn) btn.classList.add('active');
+    if (name === 'applications')      loadApplications();
+    if (name === 'task-applications') loadTaskApplications('pending', null);
+    if (name === 'reports')           loadReports();
+    if (name === 'checkins')          loadCheckins();
+    if (name === 'documents')         loadDocuments();
+    if (name === 'analytics')         loadAnalytics();
 }
 
-// ── CURATOR: applications (UC-12) ─────────────────────────────────────────────
+// ── CURATOR: general applications ────────────────────────────────────────────
 async function loadApplications() {
     const c = document.getElementById('applicationsList');
     c.innerHTML = '<p style="color:#6b7280;">Загрузка...</p>';
     try {
-        const r = await fetch(${API_URL}/applications/for-curator, { headers: authHeaders() });
+        const r = await fetch(API_URL + '/applications/for-curator', { headers: authHeaders() });
         const apps = await r.json();
-        if (!Array.isArray(apps)  !apps.length) { c.innerHTML = '<p style="color:#6b7280;">Нет новых заявок</p>'; return; }
-        c.innerHTML = apps.map(a => `
-            <div class="app-item">
-                <div class="app-info">
-                    <h4>${escapeHtml(a.user_name  'Волонтёр')}</h4>
-                    <small>Задача: ${escapeHtml(a.task_title  '—')}</small><br>
-                    <small>${a.message ? `💬 ${escapeHtml(a.message)}` : ''}</small>
-                </div>
-                <div class="app-actions">
-                    <span class="status-badge status-pending">Ожидает</span>
-                    <button class="btn-card-small" onclick="approveApplication(${a.id})">✅ Одобрить</button>
-                    <button class="btn-danger-small" onclick="rejectApplication(${a.id})">❌ Отклонить</button>
-                </div>
-            </div>`).join('');
+        if (!Array.isArray(apps)  !apps.length) {
+            c.innerHTML = '<div class="empty-state">📭 Нет новых заявок</div>';
+            return;
+        }
+        c.innerHTML = apps.map(function(a) {
+            return '<div class="app-item">' +
+                '<div class="app-info">' +
+                '<h4>' + escapeHtml(a.user_name  'Волонтёр') + '</h4>' +
+                '<small>Задача: ' + escapeHtml(a.task_title  '—') + '</small>' +
+                (a.message ? '<br><small>💬 ' + escapeHtml(a.message) + '</small>' : '') +
+                '</div>' +
+                '<div class="app-actions">' +
+                '<span class="status-badge status-pending">Ожидает</span>' +
+                '<button class="btn-card-small" onclick="approveApplication(' + a.id + ')">✅ Одобрить</button>' +
+                '<button class="btn-danger-small" onclick="rejectApplication(' + a.id + ')">❌ Отклонить</button>' +
+                '</div></div>';
+        }).join('');
     } catch(e) { c.innerHTML = '<p style="color:#dc2626;">Ошибка загрузки</p>'; }
 }
 
 async function approveApplication(appId) {
     try {
-        const r = await fetch(`${API_URL}/applications/${appId}/approve`, { method: 'POST', headers: authHeaders() });
+        const r = await fetch(API_URL + '/applications/' + appId + '/approve', { method: 'POST', headers: authHeaders() });
         const d = await r.json();
         showToast(d.message  'Заявка одобрена!');
         loadApplications();
@@ -723,42 +770,204 @@ async function approveApplication(appId) {
 
 async function rejectApplication(appId) {
     try {
-        const r = await fetch(${API_URL}/applications/${appId}/reject, { method: 'POST', headers: authHeaders() });
+        const r = await fetch(API_URL + '/applications/' + appId + '/reject', { method: 'POST', headers: authHeaders() });
         const d = await r.json();
-        showToast(d.message  'Заявка отклонена', true);
+        showToast(d.message  'Заявка отклонена');
         loadApplications();
     } catch(e) { showToast('Ошибка', false); }
 }
 
-// ── CURATOR: reports (UC-12) ──────────────────────────────────────────────────
+// ── CURATOR: task applications (новая вкладка) ────────────────────────────────
+
+async function loadTaskApplications(statusFilter, filterBtn) {
+    // обновляем кнопки фильтра если нажата
+    if (filterBtn) {
+        document.querySelectorAll('#section-task-applications .btn-filter').forEach(function(b) {
+            b.classList.remove('active');
+        });
+        filterBtn.classList.add('active');
+    }
+
+    const c = document.getElementById('taskApplicationsList');
+    c.innerHTML = '<p style="color:#6b7280;">Загрузка...</p>';
+
+    try {
+        // Получаем все задачи
+        const tasksR = await fetch(API_URL + '/api/tasks', { headers: authHeaders() });
+        const tasks  = await tasksR.json();
+        if (!Array.isArray(tasks)  !tasks.length) {
+            c.innerHTML = '<div class="empty-state">📭 Нет задач</div>';
+            return;
+        }
+
+        // Получаем заявки (ожидающие)
+        const appsR  = await fetch(API_URL + '/applications/for-curator', { headers: authHeaders() });
+        const allApps = await appsR.json();
+        const apps   = Array.isArray(allApps) ? allApps : [];
+// Фильтруем по статусу
+        const filtered = statusFilter === 'all' ? apps :
+                         statusFilter === 'approved' ? apps.filter(function(a) { return a.status === 'approved'; }) :
+                         apps.filter(function(a) { return !a.status  a.status === 'pending'; });
+
+        if (!filtered.length) {
+            c.innerHTML = '<div class="empty-state">📭 ' +
+                (statusFilter === 'pending' ? 'Нет заявок, ожидающих проверки' :
+                 statusFilter === 'approved' ? 'Нет одобренных заявок' : 'Нет заявок') + '</div>';
+            return;
+        }
+
+        // Группируем по задачам
+        const byTask = {};
+        filtered.forEach(function(a) {
+            const tid = a.task_id  0;
+            if (!byTask[tid]) byTask[tid] = { title: a.task_title  ('Задача #' + tid), apps: [] };
+            byTask[tid].apps.push(a);
+        });
+
+        c.innerHTML = Object.keys(byTask).map(function(tid) {
+            const group = byTask[tid];
+            const count = group.apps.length;
+            const rows  = group.apps.map(function(a) {
+                const isPending  = !a.status  a.status === 'pending';
+                const statusHtml = isPending
+                    ? '<span class="status-badge status-pending">⏳ Ожидает</span>'
+                    : a.status === 'approved'
+                        ? '<span class="status-badge status-approved">✅ Одобрен</span>'
+                        : '<span class="status-badge status-rejected">❌ Отклонён</span>';
+                const actionsHtml = isPending
+                    ? '<button class="btn-card-small" onclick="approveTaskApp(' + a.id + ', this)">✅ Принять</button>' +
+                      '<button class="btn-danger-small" onclick="rejectTaskApp(' + a.id + ', this)">❌ Отклонить</button>'
+                    : '';
+                return '<div class="volunteer-row" id="app-row-' + a.id + '">' +
+                    '<div>' +
+                    '<div class="volunteer-name">👤 ' + escapeHtml(a.user_name  'Волонтёр') + '</div>' +
+                    '<div class="volunteer-meta">' +
+                        (a.user_email ? '✉️ ' + escapeHtml(a.user_email) + ' · ' : '') +
+                        (a.message ? '💬 ' + escapeHtml(a.message) : 'Без сообщения') +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="task-app-actions">' + statusHtml + actionsHtml + '</div>' +
+                    '</div>';
+            }).join('');
+
+            return '<div class="task-app-item">' +
+                '<div class="task-app-header">' +
+                '<div>' +
+                '<div class="task-app-title">📌 ' + escapeHtml(group.title) + '</div>' +
+                '</div>' +
+                '<div style="display:flex;align-items:center;gap:8px;">' +
+                '<span class="badge-count">' + count + ' заявок</span>' +
+                '<button class="task-toggle-btn" onclick="toggleVolunteers(\'' + tid + '\')">Показать ▾</button>' +
+                '</div>' +
+                '</div>' +
+                '<div class="volunteers-list" id="vlist-' + tid + '">' + rows + '</div>' +
+                '</div>';
+        }).join('');
+
+    } catch(e) {
+        c.innerHTML = '<p style="color:#dc2626;">Ошибка загрузки заявок</p>';
+        console.error(e);
+    }
+}
+
+function toggleVolunteers(tid) {
+    const list = document.getElementById('vlist-' + tid);
+    const btn  = list.previousElementSibling.querySelector('.task-toggle-btn');
+    if (list.classList.contains('open')) {
+        list.classList.remove('open');
+        btn.textContent = 'Показать ▾';
+    } else {
+        list.classList.add('open');
+        btn.textContent = 'Скрыть ▴';
+    }
+}
+
+async function approveTaskApp(appId, btn) {
+    btn.disabled = true;
+    btn.textContent = '...';
+    try {
+        const r = await fetch(API_URL + '/applications/' + appId + '/approve', { method: 'POST', headers: authHeaders() });
+        const d = await r.json();
+        if (r.ok) {
+            showToast(d.message  'Заявка одобрена! Волонтёр назначен на задачу.');
+// Обновляем строку без перезагрузки всего списка
+            const row = document.getElementById('app-row-' + appId);
+            if (row) {
+                const actions = row.querySelector('.task-app-actions');
+                actions.innerHTML = '<span class="status-badge status-approved">✅ Одобрен</span>';
+            }
+        } else {
+            showToast(d.detail  d.message  'Ошибка', false);
+            btn.disabled = false;
+            btn.textContent = '✅ Принять';
+        }
+    } catch(e) {
+        showToast('Ошибка соединения', false);
+        btn.disabled = false;
+        btn.textContent = '✅ Принять';
+    }
+}
+
+async function rejectTaskApp(appId, btn) {
+    btn.disabled = true;
+    btn.textContent = '...';
+    try {
+        const r = await fetch(API_URL + '/applications/' + appId + '/reject', { method: 'POST', headers: authHeaders() });
+        const d = await r.json();
+        showToast(d.message  'Заявка отклонена');
+        const row = document.getElementById('app-row-' + appId);
+        if (row) {
+            const actions = row.querySelector('.task-app-actions');
+            actions.innerHTML = '<span class="status-badge status-rejected">❌ Отклонён</span>';
+        }
+    } catch(e) {
+        showToast('Ошибка соединения', false);
+        btn.disabled = false;
+        btn.textContent = '❌ Отклонить';
+    }
+}
+
+function startTaskAppsPolling() {
+    if (taskAppsInterval) clearInterval(taskAppsInterval);
+    taskAppsInterval = setInterval(function() {
+        // Автообновляем только если вкладка "На задачи" активна
+        if (document.getElementById('section-task-applications').classList.contains('active')) {
+            loadTaskApplications('pending', null);
+        }
+    }, 15000);
+}
+
+// ── CURATOR: reports ──────────────────────────────────────────────────────────
 
 async function loadReports() {
     const c = document.getElementById('reportsList');
     c.innerHTML = '<p style="color:#6b7280;">Загрузка...</p>';
     try {
-        const r = await fetch(`${API_URL}/api/reports/pending`, { headers: authHeaders() });
+        const r = await fetch(API_URL + '/api/reports/pending', { headers: authHeaders() });
         const reports = await r.json();
-        if (!Array.isArray(reports)  !reports.length) { c.innerHTML = '<p style="color:#6b7280;">Нет отчётов на проверке</p>'; return; }
-        c.innerHTML = reports.map(rep => `
-            <div class="app-item">
-                <div class="app-info">
-                    <h4>${escapeHtml(rep.user_name  'Волонтёр')}</h4>
-                    <small>⏱️ ${rep.hours  0} часов</small>
-                    <small>💬 ${escapeHtml(rep.comment  '—')}</small><br>
-                    ${rep.photo_url ? `<img src="${API_URL}${rep.photo_url}" class="report-photo" onerror="this.style.display='none'">` : ''}
-                </div>
-                <div class="app-actions">
-                    <span class="status-badge status-pending">На проверке</span>
-                    <button class="btn-card-small" onclick="approveReport(${rep.id})">✅ Принять</button>
-                    <button class="btn-danger-small" onclick="rejectReport(${rep.id})">❌ Отклонить</button>
-                </div>
-            </div>`).join('');
+        if (!Array.isArray(reports)  !reports.length) {
+            c.innerHTML = '<div class="empty-state">📭 Нет отчётов на проверке</div>';
+            return;
+        }
+        c.innerHTML = reports.map(function(rep) {
+            return '<div class="app-item">' +
+                '<div class="app-info">' +
+                '<h4>' + escapeHtml(rep.user_name  'Волонтёр') + '</h4>' +
+                '<small>⏱️ ' + (rep.hours  0) + ' часов · 💬 ' + escapeHtml(rep.comment  '—') + '</small><br>' +
+                (rep.photo_url ? '<img src="' + API_URL + rep.photo_url + '" class="report-photo" onerror="this.style.display=\'none\'">' : '') +
+                '</div>' +
+                '<div class="app-actions">' +
+                '<span class="status-badge status-pending">На проверке</span>' +
+                '<button class="btn-card-small" onclick="approveReport(' + rep.id + ')">✅ Принять</button>' +
+                '<button class="btn-danger-small" onclick="rejectReport(' + rep.id + ')">❌ Отклонить</button>' +
+                '</div></div>';
+        }).join('');
     } catch(e) { c.innerHTML = '<p style="color:#dc2626;">Ошибка загрузки</p>'; }
 }
 
 async function approveReport(repId) {
     try {
-        const r = await fetch(`${API_URL}/api/reports/${repId}/approve`, { method: 'POST', headers: authHeaders() });
+        const r = await fetch(API_URL + '/api/reports/' + repId + '/approve', { method: 'POST', headers: authHeaders() });
         const d = await r.json();
         showToast(d.message  'Отчёт принят, баллы начислены (BR-09)');
         loadReports();
@@ -766,85 +975,77 @@ async function approveReport(repId) {
 }
 async function rejectReport(repId) {
     try {
-        const r = await fetch(${API_URL}/api/reports/${repId}/reject, { method: 'POST', headers: authHeaders() });
+        const r = await fetch(API_URL + '/api/reports/' + repId + '/reject', { method: 'POST', headers: authHeaders() });
         const d = await r.json();
-        if (d.warn_block) showToast(⚠️ ${d.warn_message}, false);
-        else showToast('Отчёт отклонён');
+        if (d.warn_block) showToast('⚠️ ' + d.warn_message, false);
+        else showToast(d.message  'Отчёт отклонён');
         loadReports();
     } catch(e) { showToast('Ошибка', false); }
 }
 
-// ── CURATOR: checkins (UC-14) ─────────────────────────────────────────────────
+function startReportsPolling() {
+    if (reportsInterval) clearInterval(reportsInterval);
+    reportsInterval = setInterval(loadReports, 8000);
+}
+
+// ── CURATOR: checkins ─────────────────────────────────────────────────────────
 
 async function loadCheckins() {
     const c = document.getElementById('checkinsList');
     try {
-        const r = await fetch(${API_URL}/checkins, { headers: authHeaders() });
+        const r = await fetch(API_URL + '/checkins', { headers: authHeaders() });
         const data = await r.json();
-        if (!Array.isArray(data)  !data.length) { c.innerHTML = '<p style="color:#6b7280;">Нет отметок о явке</p>'; return; }
-        c.innerHTML = data.map(ch => `
-            <div class="checkin-live">
-                <div class="checkin-dot"></div>
-                <strong>${escapeHtml(ch.user_name  'Волонтёр')}</strong>
-                <span style="color:#6b7280;margin-left:8px;">→ ${escapeHtml(ch.task_title  '—')}</span>
-                <span style="margin-left:auto;color:#22c55e;font-size:13px;">✓ checked in</span>
-            </div>`).join('');
-    } catch(e) { c.innerHTML = '<p style="color:#6b7280;">Нет данных о явке</p>'; }
-}
-
-function startReportsPolling() {
-    if (reportsInterval) clearInterval(reportsInterval);
-    reportsInterval = setInterval(loadReports, 8000); // каждые 8 сек
+        if (!Array.isArray(data)  !data.length) {
+            c.innerHTML = '<div class="empty-state">📭 Нет отметок о явке</div>';
+            return;
+        }
+        c.innerHTML = data.map(function(ch) {
+            return '<div class="checkin-live">' +
+                '<div class="checkin-dot"></div>' +
+                '<strong>' + escapeHtml(ch.user_name  'Волонтёр') + '</strong>' +
+                '<span style="color:#6b7280;margin-left:8px;">→ ' + escapeHtml(ch.task_title  '—') + '</span>' +
+                '<span style="margin-left:auto;color:#22c55e;font-size:13px;">✓ checked in</span>' +
+                '</div>';
+        }).join('');
+    } catch(e) { c.innerHTML = '<div class="empty-state">Нет данных о явке</div>'; }
 }
 
 function startCheckinPolling() {
     if (checkinInterval) clearInterval(checkinInterval);
-    checkinInterval = setInterval(loadCheckins, 10000); // каждые 10 сек
+    checkinInterval = setInterval(loadCheckins, 10000);
 }
 
-// ── CURATOR: documents (UC-16) ────────────────────────────────────────────────
+// ── CURATOR: documents ────────────────────────────────────────────────────────
 
 async function loadDocuments() {
     const c = document.getElementById('documentsList');
     c.innerHTML = '<p style="color:#6b7280;">Загрузка...</p>';
-    // Заглушка — API не имеет GET /documents списка
-    c.innerHTML = `
-        <div class="doc-item">
-            <div><strong>Паспорт</strong><br><small style="color:#6b7280;">Волонтёр #12 · Загружен сегодня</small></div>
-            <div style="display:flex;gap:8px;">
-                <span class="status-badge status-pending">Новый</span>
-                <button class="btn-card-small" onclick="verifyDocument(1)">✅ Верифицировать</button>
-            </div>
-        </div>
-        <div class="doc-item">
-            <div><strong>Справка</strong><br><small style="color:#6b7280;">Волонтёр #8 · Загружен вчера</small></div>
-            <div style="display:flex;gap:8px;">
-                <span class="status-badge status-approved">Верифицирован</span>
-            </div>
-        </div>`;
+    c.innerHTML =
+        '<div class="doc-item"><div><strong>Паспорт</strong><br><small style="color:#6b7280;">Волонтёр #12 · Загружен сегодня</small></div><div style="display:flex;gap:8px;"><span class="status-badge status-pending">Новый</span><button class="btn-card-small" onclick="verifyDocument(1)">✅ Верифицировать</button></div></div>' +
+        '<div class="doc-item"><div><strong>Справка</strong><br><small style="color:#6b7280;">Волонтёр #8 · Загружен вчера</small></div><div style="display:flex;gap:8px;"><span class="status-badge status-approved">Верифицирован</span></div></div>';
 }
-
 async function verifyDocument(docId) {
     try {
-        const r = await fetch(`${API_URL}/documents/${docId}/verify`, { method: 'POST', headers: authHeaders() });
+        const r = await fetch(API_URL + '/documents/' + docId + '/verify', { method: 'POST', headers: authHeaders() });
         const d = await r.json();
         showToast(d.message  'Документ верифицирован');
         loadDocuments();
     } catch(e) { showToast('Ошибка верификации', false); }
 }
 
-// ── CURATOR: analytics (UC-18) ───────────────────────────────────────────────
+// ── CURATOR: analytics ────────────────────────────────────────────────────────
+
 async function loadAnalytics() {
     const c = document.getElementById('analyticsGrid');
     try {
-        const r = await fetch(${API_URL}/analytics/summary, { headers: authHeaders() });
+        const r = await fetch(API_URL + '/analytics/summary', { headers: authHeaders() });
         const d = await r.json();
-        c.innerHTML = `
-            <div class="analytics-card"><div class="analytics-number">${d.total_volunteers  0}</div><div class="analytics-label">Волонтёров</div></div>
-            <div class="analytics-card"><div class="analytics-number">${d.active_tasks  0}</div><div class="analytics-label">Открытых задач</div></div>
-            <div class="analytics-card"><div class="analytics-number">${d.completed_reports  0}</div><div class="analytics-label">Принятых отчётов</div></div>
-            <div class="analytics-card"><div class="analytics-number">${d.pending_reports  0}</div><div class="analytics-label">На проверке</div></div>
-            <div class="analytics-card"><div class="analytics-number">${(d.avg_hours_per_task || 0).toFixed(1)}</div><div class="analytics-label">Ср. часов / задача</div></div>`;
+        c.innerHTML =
+            '<div class="analytics-card"><div class="analytics-number">' + (d.total_volunteers  0) + '</div><div class="analytics-label">Волонтёров</div></div>' +
+            '<div class="analytics-card"><div class="analytics-number">' + (d.active_tasks  0) + '</div><div class="analytics-label">Открытых задач</div></div>' +
+            '<div class="analytics-card"><div class="analytics-number">' + (d.completed_reports  0) + '</div><div class="analytics-label">Принятых отчётов</div></div>' +
+            '<div class="analytics-card"><div class="analytics-number">' + (d.pending_reports  0) + '</div><div class="analytics-label">На проверке</div></div>' +
+            '<div class="analytics-card"><div class="analytics-number">' + ((d.avg_hours_per_task  0).toFixed(1)) + '</div><div class="analytics-label">Ср. часов / задача</div></div>';
     } catch(e) { c.innerHTML = '<p style="color:#dc2626;">Ошибка загрузки аналитики</p>'; }
 }
 
@@ -856,7 +1057,7 @@ function showTasks()    { document.getElementById('tasksList').scrollIntoView({ 
 function showHelp()     { showNotification('Как помочь', '1. Зарегистрируйтесь\n2. Выберите задачу\n3. Выполните и подайте отчёт\n4. Получите благодарность!'); }
 function showContacts() { showNotification('Контакты', '📧 info@dobrygorod.ru\n📞 8 (800) 123-45-67'); }
 
-window.onclick = e => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+window.onclick = function(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
 </script>
 </body>
-</html>
+</html>  попробуй вставить
