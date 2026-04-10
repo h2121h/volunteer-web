@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добрый Город | Волонтёрский центр</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: #f8fafc; line-height: 1.5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .navbar { background: white; padding: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .logo { font-size: 24px; font-weight: 700; color: #2d6a4f; text-decoration: none; cursor: pointer; }
+        .nav-links { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+        .nav-links a, .nav-links button { text-decoration: none; color: #333; font-weight: 500; cursor: pointer; background: none; border: none; font-size: 16px; }
+        .btn-outline { border: 2px solid #2d6a4f; color: #2d6a4f; padding: 8px 20px; border-radius: 30px; font-weight: 600; cursor: pointer; background: none; font-size: 16px; }
+        .btn-success { background: #2d6a4f; color: white; padding: 8px 20px; border-radius: 30px; font-weight: 600; cursor: pointer; border: none; font-size: 16px; }
+        .hero { background: linear-gradient(135deg, #2d6a4f, #40916c); color: white; padding: 60px 0; text-align: center; border-radius: 0 0 40px 40px; }
+        .hero h1 { font-size: 42px; margin-bottom: 20px; }
+        .hero p { font-size: 18px; margin-bottom: 30px; max-width: 700px; margin-left: auto; margin-right: auto; }
+        .hero-buttons { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .btn-light { background: white; color: #2d6a4f; padding: 12px 30px; border-radius: 40px; font-weight: 700; cursor: pointer; border: none; font-size: 18px; }
+        .btn-outline-light { border: 2px solid white; color: white; padding: 12px 30px; border-radius: 40px; font-weight: 700; cursor: pointer; background: none; font-size: 18px; }
+        .stats { margin-top: -40px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; background: white; border-radius: 30px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .stat-item { text-align: center; }
+        .stat-number { font-size: 40px; font-weight: 800; color: #1e2f3a; }
+        .stat-label { color: #6b7280; font-size: 16px; }
+        .section-title { font-size: 32px; margin: 50px 0 25px; font-weight: 700; }
+        .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        .card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.03); border: 1px solid #eef2f6; transition: transform 0.2s, box-shadow 0.2s; }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .card-img { height: 160px; background: linear-gradient(135deg, #2d6a4f, #40916c); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px; }
+        .card-content { padding: 20px; }
+        .card-title { font-size: 20px; margin-bottom: 10px; font-weight: 700; }
+        .card-text { color: #6b7280; margin-bottom: 20px; }
+        .card-meta { display: flex; justify-content: space-between; color: #6b7280; font-size: 14px; margin-bottom: 20px; }
+        .btn-card { display: block; text-align: center; padding: 10px; border: 2px solid #2d6a4f; border-radius: 30px; color: #2d6a4f; font-weight: 600; cursor: pointer; width: 100%; background: none; font-size: 16px; transition: all 0.2s; }
+        .btn-card:hover { background: #2d6a4f; color: white; }
+        .btn-card-small { padding: 5px 15px; border: 2px solid #2d6a4f; border-radius: 30px; color: #2d6a4f; font-weight: 600; cursor: pointer; background: none; font-size: 14px; transition: all 0.2s; }
+.btn-card-small:hover { background: #2d6a4f; color: white; }
+        .btn-danger-small { padding: 5px 15px; border: 2px solid #dc2626; border-radius: 30px; color: #dc2626; font-weight: 600; cursor: pointer; background: none; font-size: 14px; transition: all 0.2s; }
+        .btn-danger-small:hover { background: #dc2626; color: white; }
+        .filters-section { background: white; border-radius: 24px; padding: 24px; margin-bottom: 30px; border: 1px solid #eef2f6; }
+        .filters-grid { display: flex; flex-wrap: wrap; gap: 30px; align-items: flex-end; }
+        .filter-group { flex: 1; min-width: 150px; }
+        .filter-group label { display: block; font-size: 13px; font-weight: 600; color: #4a5b6e; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .filter-group select { width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 40px; font-size: 14px; background: white; cursor: pointer; }
+        .distance-slider { width: 100%; margin: 10px 0; }
+        .distance-value { text-align: center; background: #f1f5f9; font-weight: 600; color: #2d6a4f; padding: 10px 14px; border-radius: 40px; }
+        .filter-buttons { display: flex; gap: 10px; }
+        .btn-filter { background: #f1f5f9; border: none; padding: 10px 20px; border-radius: 40px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .btn-filter:hover, .btn-filter.active { background: #2d6a4f; color: white; }
+        .btn-reset { background: white; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 40px; cursor: pointer; }
+        .task-list { background: white; border-radius: 20px; border: 1px solid #eef2f6; overflow: hidden; }
+        .task-item { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #eef2f6; flex-wrap: wrap; gap: 10px; transition: background 0.2s; }
+        .task-item:hover { background: #f9f9f9; }
+        .task-item:last-child { border-bottom: none; }
+        .task-info h4 { font-size: 18px; margin-bottom: 5px; }
+        .task-info small { color: #6b7280; display: inline-block; margin-right: 16px; margin-top: 4px; }
+        .task-tag { display: inline-block; background: #f1f5f9; padding: 2px 10px; border-radius: 20px; font-size: 11px; margin-right: 8px; color: #475569; }
+        .task-badge { background: #2d6a4f; color: white; padding: 5px 15px; border-radius: 30px; font-size: 14px; }
+        .no-tasks { text-align: center; padding: 40px; color: #6b7280; }
+        .role-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-left: 10px; }
+        .role-volunteer { background: #e3f2fd; color: #1976d2; }
+        .role-organizer { background: #fff3e0; color: #ed6c02; }
+        .role-curator { background: #f3e5f5; color: #9c27b0; }
+        .role-admin { background: #ffebee; color: #d32f2f; }
+        .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 40px 0; }
+        .step { background: white; padding: 25px; border-radius: 20px; text-align: center; border: 1px solid #eef2f6; transition: transform 0.2s; }
+        .step:hover { transform: translateY(-4px); }
+        .step-number { width: 50px; height: 50px; background: #2d6a4f; color: white; font-size: 24px; font-weight: 700; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; }
+        .footer { background: #1e2f3a; color: #b0c4ce; padding: 50px 0 20px; margin-top: 60px; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; }
+        .footer a { color: #b0c4ce; text-decoration: none; display: block; margin-bottom: 8px; cursor: pointer; }
+        .footer a:hover { color: white; }
+        .footer hr { margin: 30px 0 20px; border-color: #334854; }
+        .copyright { text-align: center; color: #6c8a9c; font-size: 14px; }
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 30px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .modal-content h3 { margin-bottom: 20px; color: #1e2f3a; }
+        .modal-content input, .modal-content textarea, .modal-content select { width: 100%; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #e0e0e0; border-radius: 15px; font-size: 16px; font-family: inherit; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-buttons button { flex: 1; padding: 12px; border-radius: 30px; border: none; cursor: pointer; font-size: 16px; font-weight: 600; }
+        .modal-buttons .submit { background: #2d6a4f; color: white; }
+        .modal-buttons .cancel { background: #f0f0f0; color: #333; }
+        .toast { position: fixed; bottom: 30px; right: 30px; background: #2d6a4f; color: white; padding: 15px 25px; border-radius: 10px; display: none; z-index: 2000; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 40px; height: 40px; background: #2d6a4f; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .project-detail-modal { max-width: 600px; }
+        .project-tasks-list { margin: 20px 0; }
+        .project-task-item { padding: 10px; border: 1px solid #eef2f6; border-radius: 10px; margin-bottom: 10px; }
+
+        /* ── CURATOR PANEL ── */
+        .curator-panel { display: none; background: white; border-radius: 24px; padding: 30px; margin: 30px 0; border: 2px solid #9c27b0; }
+        .curator-panel h2 { color: #9c27b0; margin-bottom: 20px; }
+        .curator-tabs { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+        .curator-tab { padding: 8px 20px; border-radius: 30px; border: 2px solid #9c27b0; color: #9c27b0; cursor: pointer; font-weight: 600; background: none; transition: all 0.2s; }
+        .curator-tab.active { background: #9c27b0; color: white; }
+        .curator-section { display: none; }
+        .curator-section.active { display: block; }
+        .app-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid #eef2f6; border-radius: 14px; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+        .app-item:hover { background: #faf5ff; }
+        .app-info h4 { font-size: 16px; margin-bottom: 4px; }
+        .app-info small { color: #6b7280; }
+        .app-actions { display: flex; gap: 8px; }
+        .status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-approved { background: #d1e7dd; color: #0a3622; }
+        .status-rejected { background: #f8d7da; color: #58151c; }
+        .report-photo { width: 80px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 10px; }
+        .checkin-live { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: #f0fdf4; border-radius: 12px; margin-bottom: 8px; }
+        .checkin-dot { width: 10px; height: 10px; background: #22c55e; border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .analytics-card { background: #f8fafc; border-radius: 16px; padding: 20px; text-align: center; }
+        .analytics-number { font-size: 32px; font-weight: 800; color: #9c27b0; }
+        .analytics-label { color: #6b7280; font-size: 14px; margin-top: 4px; }
+        .doc-item { display: flex; justify-content: space-between; align-items: center; padding: 14px; border: 1px solid #eef2f6; border-radius: 12px; margin-bottom: 10px; }
+@media (max-width: 768px) {
+            .hero h1 { font-size: 32px; }
+            .filters-grid { flex-direction: column; }
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── MODALS ── -->
+<div class="modal" id="loginModal">
+    <div class="modal-content">
+        <h3>Вход в систему</h3>
+        <input type="email" placeholder="Email" id="loginEmail" required>
+        <input type="password" placeholder="Пароль" id="loginPassword" required>
+        <div class="modal-buttons">
+            <button class="cancel" onclick="closeModal('loginModal')">Отмена</button>
+            <button class="submit" onclick="loginUser()">Войти</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="registerModal">
+    <div class="modal-content">
+        <h3>Регистрация</h3>
+        <input type="email" placeholder="Email *" id="regEmail" required>
+        <input type="password" placeholder="Пароль *" id="regPassword" required>
+        <select id="regRole">
+            <option value="volunteer">👤 Волонтёр</option>
+            <option value="organizer">📋 Организатор</option>
+            <option value="curator">⭐️ Куратор</option>
+        </select>
+        <div class="modal-buttons">
+            <button class="cancel" onclick="closeModal('registerModal')">Отмена</button>
+            <button class="submit" onclick="registerUser()">Зарегистрироваться</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="notificationModal">
+    <div class="modal-content">
+        <h3 id="notificationTitle">Уведомление</h3>
+        <p id="notificationMessage"></p>
+        <div class="modal-buttons">
+            <button class="submit" onclick="closeModal('notificationModal')">OK</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="joinTaskModal">
+    <div class="modal-content">
+        <h3>Запись на задачу</h3>
+        <p id="joinTaskInfo"></p>
+        <input type="hidden" id="joinTaskId">
+        <div class="modal-buttons">
+            <button class="cancel" onclick="closeModal('joinTaskModal')">Отмена</button>
+            <button class="submit" onclick="confirmJoinTask()">Подтвердить запись</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="projectDetailsModal">
+    <div class="modal-content project-detail-modal">
+        <h3 id="projectDetailTitle">Информация о проекте</h3>
+        <div id="projectDetailContent"></div>
+        <div class="project-tasks-list" id="projectTasksList"></div>
+        <div class="modal-buttons">
+            <button class="submit" onclick="closeModal('projectDetailsModal')">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ── NAVBAR ── -->
+<nav class="navbar">
+    <div class="container">
+        <a href="#" class="logo" onclick="scrollToTop()">❤️ Добрый Город</a>
+        <div class="nav-links">
+            <a onclick="showProjects()">Проекты</a>
+            <a onclick="showTasks()">Задачи</a>
+            <a onclick="showHelp()">Как помочь</a>
+            <div id="authButtons" style="display:flex;gap:10px;">
+                <button class="btn-outline" onclick="openModal('loginModal')">Войти</button>
+                <button class="btn-success" onclick="openModal('registerModal')">Регистрация</button>
+            </div>
+            <div id="userMenu" style="display:none;">
+                <div class="user-info">
+                    <span id="userEmailDisplay"></span>
+                    <span id="userRoleBadge" class="role-badge"></span>
+                    <div class="avatar">👤</div>
+                    <button class="btn-outline" onclick="logout()">Выйти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+<!-- ── HERO ── -->
+<section class="hero">
+    <div class="container">
+        <h1>Твоё добро может изменить мир</h1>
+        <p>Присоединяйся к волонтёрскому движению. Помогай тем, кто нуждается, и находи новых друзей.</p>
+        <div class="hero-buttons">
+            <button class="btn-light" onclick="openModal('registerModal')">Стать волонтёром</button>
+            <button class="btn-outline-light" onclick="showProjects()">Смотреть проекты</button>
+        </div>
+    </div>
+</section>
+
+<!-- ── STATS ── -->
+<div class="container stats">
+    <div class="stats-grid">
+        <div class="stat-item">
+            <div class="stat-number" id="volunteersCount">0</div>
+            <div class="stat-label">Активных волонтёров</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" id="tasksCompleted">0</div>
+            <div class="stat-label">Выполненных задач</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" id="projectsCount">0</div>
+            <div class="stat-label">Проектов</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── CURATOR PANEL (показывается только для curator) ── -->
+<div class="container">
+    <div class="curator-panel" id="curatorPanel">
+        <h2>⭐️ Панель куратора</h2>
+        <div class="curator-tabs">
+            <button class="curator-tab active" onclick="showCuratorTab('applications')">📋 Заявки</button>
+            <button class="curator-tab" onclick="showCuratorTab('reports')">📄 Отчёты</button>
+            <button class="curator-tab" onclick="showCuratorTab('checkins')">✅ Явка</button>
+            <button class="curator-tab" onclick="showCuratorTab('documents')">📁 Документы</button>
+            <button class="curator-tab" onclick="showCuratorTab('analytics')">📊 Аналитика</button>
+        </div>
+
+        <!-- Заявки (UC-12) -->
+        <div class="curator-section active" id="section-applications">
+            <h3 style="margin-bottom:16px;">Заявки волонтёров</h3>
+            <button class="btn-filter" onclick="loadApplications()" style="margin-bottom:16px;">🔄 Обновить</button>
+            <div id="applicationsList"><p style="color:#6b7280;">Загрузка...</p></div>
+        </div>
+
+        <!-- Отчёты (UC-12) -->
+        <div class="curator-section" id="section-reports">
+            <h3 style="margin-bottom:16px;">Отчёты на проверке</h3>
+            <p style="color:#6b7280;margin-bottom:16px;font-size:14px;">BR-03: 72ч на проверку — иначе автоодобрение</p>
+            <button class="btn-filter" onclick="loadReports()" style="margin-bottom:16px;">🔄 Обновить</button>
+            <div id="reportsList"><p style="color:#6b7280;">Загрузка...</p></div>
+        </div>
+
+        <!-- Явка (UC-14) -->
+        <div class="curator-section" id="section-checkins">
+            <h3 style="margin-bottom:16px;">Мониторинг явки (реальное время)</h3>
+            <p style="color:#6b7280;margin-bottom:16px;font-size:14px;">Данные обновляются каждые 10 секунд</p>
+            <button class="btn-filter" onclick="loadCheckins()" style="margin-bottom:16px;">🔄 Обновить</button>
+            <div id="checkinsList"><p style="color:#6b7280;">Загрузка...</p></div>
+        </div>
+
+        <!-- Документы (UC-16) -->
+        <div class="curator-section" id="section-documents">
+            <h3 style="margin-bottom:16px;">Верификация документов</h3>
+            <button class="btn-filter" onclick="loadDocuments()" style="margin-bottom:16px;">🔄 Обновить</button>
+            <div id="documentsList"><p style="color:#6b7280;">Загрузка...</p></div>
+        </div>
+
+        <!-- Аналитика (UC-18) -->
+        <div class="curator-section" id="section-analytics">
+            <h3 style="margin-bottom:16px;">Аналитика платформы</h3>
+            <button class="btn-filter" onclick="loadAnalytics()" style="margin-bottom:16px;">🔄 Загрузить</button>
+            <div class="analytics-grid" id="analyticsGrid"></div>
+        </div>
+    </div>
+</div>
+<!-- ── PROJECTS ── -->
+<div class="container">
+    <div class="section-title">🔥 Активные проекты</div>
+    <div class="projects-grid" id="projectsGrid"></div>
+</div>
+
+<!-- ── TASKS ── -->
+<div class="container">
+    <div class="section-title">📅 Ближайшие задачи</div>
+    <div class="filters-section">
+        <div class="filters-grid">
+            <div class="filter-group">
+                <label>📂 Категория</label>
+                <select id="filterCategory">
+                    <option value="all">Все категории</option>
+                    <option value="ecology">🌿 Экология</option>
+                    <option value="children">👶 Дети</option>
+                    <option value="elderly">👴 Пожилые</option>
+                    <option value="animals">🐾 Животные</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>⚡️ Нагрузка</label>
+                <select id="filterLoad">
+                    <option value="all">Любая</option>
+                    <option value="light">🟢 Лёгкая</option>
+                    <option value="medium">🟡 Средняя</option>
+                    <option value="heavy">🔴 Высокая</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>📅 Когда</label>
+                <select id="filterWhen">
+                    <option value="all">Все задачи</option>
+                    <option value="today">Сегодня</option>
+                    <option value="week">Эта неделя</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>📍 Расстояние (км)</label>
+                <input type="range" id="distanceSlider" min="0" max="50" value="50" step="1" class="distance-slider">
+                <div class="distance-value" id="distanceValue">до 50 км</div>
+            </div>
+            <div class="filter-group">
+                <label>&nbsp;</label>
+                <div class="filter-buttons">
+                    <button class="btn-filter" onclick="applyFilters()">🔍 Применить</button>
+                    <button class="btn-reset" onclick="resetFilters()">Сбросить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="task-list" id="tasksList"></div>
+</div>
+
+<!-- ── HOW TO ── -->
+<div class="container">
+    <div class="section-title">🌟 Как стать частью команды</div>
+    <div class="steps-grid">
+        <div class="step"><div class="step-number">1</div><h5>Регистрация</h5><p>Укажите email, пароль и выберите роль</p><button class="btn-card" style="margin-top:10px;" onclick="openModal('registerModal')">Зарегистрироваться</button></div>
+        <div class="step"><div class="step-number">2</div><h5>Выбор задачи</h5><p>Выберите проект или задачу по душе</p><button class="btn-card" style="margin-top:10px;" onclick="showTasks()">Выбрать</button></div>
+        <div class="step"><div class="step-number">3</div><h5>Участие и отчёт</h5><p>Помогайте и делитесь результатами</p><button class="btn-card" style="margin-top:10px;" onclick="showNotification('Участие', 'После выполнения задачи вы сможете подать отчёт с фото и получить благодарность!')">Узнать</button></div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div><h4 style="color:white;margin-bottom:15px;">❤️ Добрый Город</h4><p>Волонтёрский центр помощи</p></div>
+            <div><h5 style="color:white;margin-bottom:15px;">Навигация</h5><a onclick="showProjects()">Проекты</a><a onclick="showTasks()">Задачи</a><a onclick="showContacts()">Контакты</a></div>
+            <div><h5 style="color:white;margin-bottom:15px;">Контакты</h5><a href="mailto:info@dobrygorod.ru">info@dobrygorod.ru</a><a href="tel:88001234567">8 (800) 123-45-67</a></div>
+        </div>
+        <hr><p class="copyright">© 2025 Добрый Город · Вместе мы можем больше</p>
+    </div>
+</footer>
+<script>
+const API_URL = 'https://volunteer-api-5oq5.onrender.com';
+let currentUser = null;
+let projectsList = [];
+let tasksList = [];
+let checkinInterval = null;
+let reportsInterval  = null;
+
+const roleNames = {
+    volunteer: { name: "Волонтёр", class: "role-volunteer" },
+    organizer: { name: "Организатор", class: "role-organizer" },
+    curator:   { name: "Куратор",    class: "role-curator" },
+    admin:     { name: "Администратор", class: "role-admin" }
+};
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function getToken() { return localStorage.getItem('token'); }
+
+function authHeaders() {
+    const t = getToken();
+    return t ? { 'Content-Type': 'application/json', 'Authorization': Bearer ${t} }
+             : { 'Content-Type': 'application/json' };
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function showToast(msg, ok = true) {
+    const t = document.getElementById('toast');
+    t.style.background = ok ? '#2d6a4f' : '#dc2626';
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 3000);
+}
+
+function openModal(id)  { document.getElementById(id).style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+function showNotification(title, msg) {
+    document.getElementById('notificationTitle').textContent = title;
+    document.getElementById('notificationMessage').textContent = msg;
+    openModal('notificationModal');
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
+    loadProjects();
+    loadTasks();
+    loadStats();
+    document.getElementById('distanceSlider').addEventListener('input', function() {
+        document.getElementById('distanceValue').textContent = до ${this.value} км;
+    });
+});
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+
+async function loadStats() {
+    try {
+        const r = await fetch(${API_URL}/api/stats);
+        const d = await r.json();
+        document.getElementById('volunteersCount').textContent = d.volunteers_count  0;
+        document.getElementById('tasksCompleted').textContent  = d.tasks_completed   d.completed_tasks  0;
+        document.getElementById('projectsCount').textContent   = d.projects_count    0;
+    } catch(e) { console.error('Stats error:', e); }
+}
+
+// ── Projects ─────────────────────────────────────────────────────────────────
+
+async function loadProjects() {
+    try {
+        const r = await fetch(${API_URL}/api/projects);
+        projectsList = await r.json();
+        if (!Array.isArray(projectsList)) projectsList = [];
+        renderProjects();
+    } catch(e) { renderProjectsFallback(); }
+}
+function renderProjects() {
+    const c = document.getElementById('projectsGrid');
+    if (!projectsList.length) {
+        c.innerHTML = '<div class="card"><div class="card-content">Проектов пока нет</div></div>';
+        return;
+    }
+    c.innerHTML = projectsList.map(p => `
+        <div class="card">
+            <div class="card-img">🤝</div>
+            <div class="card-content">
+                <h4 class="card-title">${escapeHtml(p.title  'Проект')}</h4>
+                <p class="card-text">${escapeHtml(p.description  'Описание проекта')}</p>
+                <div class="card-meta"><span>📅 ${p.status  'активен'}</span></div>
+                <button class="btn-card" onclick="showProjectDetails(${p.id})">Подробнее</button>
+            </div>
+        </div>`).join('');
+}
+
+function renderProjectsFallback() {
+    const c = document.getElementById('projectsGrid');
+    if (!c.innerHTML) c.innerHTML = `
+        <div class="card"><div class="card-img">🏥</div><div class="card-content"><h4 class="card-title">Помощь больницам</h4><p class="card-text">Поддержка медицинских учреждений</p><button class="btn-card" onclick="showNotification('Информация','Проект в разработке')">Подробнее</button></div></div>
+        <div class="card"><div class="card-img">🌳</div><div class="card-content"><h4 class="card-title">Зелёный город</h4><p class="card-text">Озеленение парков</p><button class="btn-card" onclick="showNotification('Информация','Проект в разработке')">Подробнее</button></div></div>`;
+}
+
+// ── Tasks ─────────────────────────────────────────────────────────────────────
+
+async function loadTasks() {
+    try {
+        const r = await fetch(`${API_URL}/api/tasks`);
+        tasksList = await r.json();
+        if (!Array.isArray(tasksList)) tasksList = [];
+        renderTasksList();
+    } catch(e) { renderTasksFallback(); }
+}
+
+function renderTasksList() {
+    const category    = document.getElementById('filterCategory')?.value  'all';
+    const load        = document.getElementById('filterLoad')?.value  'all';
+    const when        = document.getElementById('filterWhen')?.value  'all';
+    const today       = new Date().toISOString().slice(0,10);
+    const weekLater   = new Date(); weekLater.setDate(weekLater.getDate()+7);
+    const weekLaterStr = weekLater.toISOString().slice(0,10);
+
+    let filtered = tasksList.filter(t => {
+        if (category !== 'all' && t.category !== category) return false;
+        if (load     !== 'all' && t.load     !== load)     return false;
+        if (when === 'today' && t.event_date !== today)    return false;
+        if (when === 'week'  && (t.event_date < today  t.event_date > weekLaterStr)) return false;
+        return true;
+    });
+
+    const c = document.getElementById('tasksList');
+    if (!filtered.length) { c.innerHTML = '<div class="no-tasks">😕 Задачи не найдены. Попробуйте изменить фильтры.</div>'; return; }
+    c.innerHTML = filtered.map(t => `
+        <div class="task-item">
+            <div class="task-info">
+                <h4>${escapeHtml(t.title  'Задача')}</h4>
+                <small>📅 ${t.event_date  'Дата не указана'}</small>
+                <small>📍 ${escapeHtml(t.location  'Место не указано')}</small>
+                <div class="task-tags"><span class="task-tag">👥 ${t.needed_people  5} чел.</span></div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <span class="task-badge">нужно ${t.needed_people  5} чел.</span>
+                <button class="btn-card-small" onclick="joinTask(${t.id})">Записаться</button>
+            </div>
+        </div>`).join('');
+}
+
+function renderTasksFallback() {
+    const c = document.getElementById('tasksList');
+    if (!c.innerHTML) c.innerHTML = `
+        <div class="task-item"><div class="task-info"><h4>Субботник в парке</h4><small>📅 Завтра</small><small>📍 Центральный парк</small></div><div><button class="btn-card-small" onclick="showNotification('Запись','Войдите в систему')">Записаться</button></div></div>`;
+}
+function applyFilters()  { renderTasksList(); }
+function resetFilters() {
+    ['filterCategory','filterLoad','filterWhen'].forEach(id => document.getElementById(id).value = 'all');
+    document.getElementById('distanceSlider').value = '50';
+    document.getElementById('distanceValue').textContent = 'до 50 км';
+    renderTasksList();
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+
+async function registerUser() {
+    const email    = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const role     = document.getElementById('regRole').value;
+    if (!email  !password) { showToast('Email и пароль обязательны', false); return; }
+    try {
+        const r = await fetch(`${API_URL}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, name: email.split('@')[0], role })
+        });
+        const d = await r.json();
+        if (r.status === 201  d.message) {
+            showToast('Регистрация успешна!');
+            closeModal('registerModal');
+            openModal('loginModal');
+        } else {
+            showToast(d.detail  d.message  'Ошибка регистрации', false);
+        }
+    } catch(e) { showToast('Ошибка соединения с сервером', false); }
+}
+
+async function loginUser() {
+    const email    = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    if (!email  !password) { showToast('Введите email и пароль', false); return; }
+    try {
+        const r = await fetch(`${API_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const d = await r.json();
+        if (r.ok && (d.access_token  d.token)) {
+            const token = d.access_token  d.token;
+            localStorage.setItem('token', token);
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('userRole', d.user?.role  d.role  'volunteer');
+            showToast('Вход выполнен!');
+            closeModal('loginModal');
+            await checkAuth();
+        } else {
+            showToast(d.detail  d.message  'Неверный email или пароль', false);
+        }
+    } catch(e) { showToast('Ошибка соединения с сервером', false); }
+}
+
+async function checkAuth() {
+    const token = getToken();
+    const email = localStorage.getItem('userEmail');
+    const role  = localStorage.getItem('userRole');
+    if (token && email) {
+        currentUser = { email, role };
+        updateUI();
+        if (role === 'curator'  role === 'organizer'  role === 'admin') {
+            document.getElementById('curatorPanel').style.display = 'block';
+            loadApplications();
+            startCheckinPolling();
+            startReportsPolling();
+        }
+    } else {
+        currentUser = null;
+        updateUI();
+        document.getElementById('curatorPanel').style.display = 'none';
+    }
+}
+
+function updateUI() {
+    const authDiv  = document.getElementById('authButtons');
+    const userDiv  = document.getElementById('userMenu');
+    const emailEl  = document.getElementById('userEmailDisplay');
+    const badgeEl  = document.getElementById('userRoleBadge');
+    if (currentUser) {
+        authDiv.style.display = 'none';
+        userDiv.style.display = 'block';
+        emailEl.textContent   = currentUser.email;
+        const ri = roleNames[currentUser.role]  roleNames.volunteer;
+        badgeEl.textContent   = ri.name;
+        badgeEl.className     = role-badge ${ri.class};
+    } else {
+        authDiv.style.display = 'flex';
+        userDiv.style.display = 'none';
+    }
+}
+
+function logout() {
+    localStorage.clear();
+    currentUser = null;
+    updateUI();
+    document.getElementById('curatorPanel').style.display = 'none';
+    if (checkinInterval) clearInterval(checkinInterval);
+    showToast('Вы вышли из системы');
+}
+// ── Join task ─────────────────────────────────────────────────────────────────
+
+function joinTask(taskId) {
+    if (!currentUser) { showToast('Сначала войдите в систему', false); openModal('loginModal'); return; }
+    const task = tasksList.find(t => t.id === taskId);
+    document.getElementById('joinTaskId').value   = taskId;
+    document.getElementById('joinTaskInfo').textContent = Записаться на задачу "${task?.title || taskId}"?;
+    openModal('joinTaskModal');
+}
+
+async function confirmJoinTask() {
+    const taskId = document.getElementById('joinTaskId').value;
+    try {
+        const r = await fetch(${API_URL}/api/tasks/${taskId}/apply, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({ message: 'Хочу помочь!' })
+        });
+        const d = await r.json();
+        if (d.success || r.ok) { showToast('Вы успешно записаны!'); closeModal('joinTaskModal'); }
+        else showToast(d.message  d.detail  'Ошибка записи', false);
+    } catch(e) { showToast('Ошибка соединения', false); }
+}
+
+// ── Project details ───────────────────────────────────────────────────────────
+
+function showProjectDetails(projectId) {
+    const p = projectsList.find(x => x.id === projectId);
+    document.getElementById('projectDetailTitle').textContent = p?.title  'Проект';
+    document.getElementById('projectDetailContent').innerHTML = `<p>${escapeHtml(p?.description  '')}</p>`;
+    document.getElementById('projectTasksList').innerHTML = '<h4>📋 Задачи:</h4><p>Загрузка...</p>';
+    openModal('projectDetailsModal');
+    fetch(${API_URL}/api/tasks?project_id=${projectId})
+        .then(r => r.json())
+        .then(tasks => {
+            if (tasks?.length) {
+                document.getElementById('projectTasksList').innerHTML =
+                    '<h4>📋 Задачи:</h4>' + tasks.map(t =>
+                        <div class="project-task-item"><strong>📌 ${escapeHtml(t.title)}</strong><br><small>${t.event_date||''}</small></div>
+                    ).join('');
+            } else {
+                document.getElementById('projectTasksList').innerHTML = '<h4>📋 Задачи:</h4><p>Нет активных задач</p>';
+            }
+        }).catch(() => {
+            document.getElementById('projectTasksList').innerHTML = '<h4>📋 Задачи:</h4><p>Нет активных задач</p>';
+        });
+}
+
+// ── CURATOR: tabs ─────────────────────────────────────────────────────────────
+
+function showCuratorTab(name) {
+    document.querySelectorAll('.curator-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.curator-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(section-${name}).classList.add('active');
+    event.target.classList.add('active');
+    if (name === 'applications') loadApplications();
+    if (name === 'reports')      loadReports();
+    if (name === 'checkins')     loadCheckins();
+    if (name === 'documents')    loadDocuments();
+    if (name === 'analytics')    loadAnalytics();
+}
+
+// ── CURATOR: applications (UC-12) ─────────────────────────────────────────────
+async function loadApplications() {
+    const c = document.getElementById('applicationsList');
+    c.innerHTML = '<p style="color:#6b7280;">Загрузка...</p>';
+    try {
+        const r = await fetch(${API_URL}/applications/for-curator, { headers: authHeaders() });
+        const apps = await r.json();
+        if (!Array.isArray(apps)  !apps.length) { c.innerHTML = '<p style="color:#6b7280;">Нет новых заявок</p>'; return; }
+        c.innerHTML = apps.map(a => `
+            <div class="app-item">
+                <div class="app-info">
+                    <h4>${escapeHtml(a.user_name  'Волонтёр')}</h4>
+                    <small>Задача: ${escapeHtml(a.task_title  '—')}</small><br>
+                    <small>${a.message ? `💬 ${escapeHtml(a.message)}` : ''}</small>
+                </div>
+                <div class="app-actions">
+                    <span class="status-badge status-pending">Ожидает</span>
+                    <button class="btn-card-small" onclick="approveApplication(${a.id})">✅ Одобрить</button>
+                    <button class="btn-danger-small" onclick="rejectApplication(${a.id})">❌ Отклонить</button>
+                </div>
+            </div>`).join('');
+    } catch(e) { c.innerHTML = '<p style="color:#dc2626;">Ошибка загрузки</p>'; }
+}
+
+async function approveApplication(appId) {
+    try {
+        const r = await fetch(`${API_URL}/applications/${appId}/approve`, { method: 'POST', headers: authHeaders() });
+        const d = await r.json();
+        showToast(d.message  'Заявка одобрена!');
+        loadApplications();
+    } catch(e) { showToast('Ошибка', false); }
+}
+
+async function rejectApplication(appId) {
+    try {
+        const r = await fetch(${API_URL}/applications/${appId}/reject, { method: 'POST', headers: authHeaders() });
+        const d = await r.json();
+        showToast(d.message  'Заявка отклонена', true);
+        loadApplications();
+    } catch(e) { showToast('Ошибка', false); }
+}
+
+// ── CURATOR: reports (UC-12) ──────────────────────────────────────────────────
+
+async function loadReports() {
+    const c = document.getElementById('reportsList');
+    c.innerHTML = '<p style="color:#6b7280;">Загрузка...</p>';
+    try {
+        const r = await fetch(`${API_URL}/api/reports/pending`, { headers: authHeaders() });
+        const reports = await r.json();
+        if (!Array.isArray(reports)  !reports.length) { c.innerHTML = '<p style="color:#6b7280;">Нет отчётов на проверке</p>'; return; }
+        c.innerHTML = reports.map(rep => `
+            <div class="app-item">
+                <div class="app-info">
+                    <h4>${escapeHtml(rep.user_name  'Волонтёр')}</h4>
+                    <small>⏱️ ${rep.hours  0} часов</small>
+                    <small>💬 ${escapeHtml(rep.comment  '—')}</small><br>
+                    ${rep.photo_url ? `<img src="${API_URL}${rep.photo_url}" class="report-photo" onerror="this.style.display='none'">` : ''}
+                </div>
+                <div class="app-actions">
+                    <span class="status-badge status-pending">На проверке</span>
+                    <button class="btn-card-small" onclick="approveReport(${rep.id})">✅ Принять</button>
+                    <button class="btn-danger-small" onclick="rejectReport(${rep.id})">❌ Отклонить</button>
+                </div>
+            </div>`).join('');
+    } catch(e) { c.innerHTML = '<p style="color:#dc2626;">Ошибка загрузки</p>'; }
+}
+
+async function approveReport(repId) {
+    try {
+        const r = await fetch(`${API_URL}/api/reports/${repId}/approve`, { method: 'POST', headers: authHeaders() });
+        const d = await r.json();
+        showToast(d.message  'Отчёт принят, баллы начислены (BR-09)');
+        loadReports();
+    } catch(e) { showToast('Ошибка', false); }
+}
+async function rejectReport(repId) {
+    try {
+        const r = await fetch(${API_URL}/api/reports/${repId}/reject, { method: 'POST', headers: authHeaders() });
+        const d = await r.json();
+        if (d.warn_block) showToast(⚠️ ${d.warn_message}, false);
+        else showToast('Отчёт отклонён');
+        loadReports();
+    } catch(e) { showToast('Ошибка', false); }
+}
+
+// ── CURATOR: checkins (UC-14) ─────────────────────────────────────────────────
+
+async function loadCheckins() {
+    const c = document.getElementById('checkinsList');
+    try {
+        const r = await fetch(${API_URL}/checkins, { headers: authHeaders() });
+        const data = await r.json();
+        if (!Array.isArray(data)  !data.length) { c.innerHTML = '<p style="color:#6b7280;">Нет отметок о явке</p>'; return; }
+        c.innerHTML = data.map(ch => `
+            <div class="checkin-live">
+                <div class="checkin-dot"></div>
+                <strong>${escapeHtml(ch.user_name  'Волонтёр')}</strong>
+                <span style="color:#6b7280;margin-left:8px;">→ ${escapeHtml(ch.task_title  '—')}</span>
+                <span style="margin-left:auto;color:#22c55e;font-size:13px;">✓ checked in</span>
+            </div>`).join('');
+    } catch(e) { c.innerHTML = '<p style="color:#6b7280;">Нет данных о явке</p>'; }
+}
+
+function startReportsPolling() {
+    if (reportsInterval) clearInterval(reportsInterval);
+    reportsInterval = setInterval(loadReports, 8000); // каждые 8 сек
+}
+
+function startCheckinPolling() {
+    if (checkinInterval) clearInterval(checkinInterval);
+    checkinInterval = setInterval(loadCheckins, 10000); // каждые 10 сек
+}
+
+// ── CURATOR: documents (UC-16) ────────────────────────────────────────────────
+
+async function loadDocuments() {
+    const c = document.getElementById('documentsList');
+    c.innerHTML = '<p style="color:#6b7280;">Загрузка...</p>';
+    // Заглушка — API не имеет GET /documents списка
+    c.innerHTML = `
+        <div class="doc-item">
+            <div><strong>Паспорт</strong><br><small style="color:#6b7280;">Волонтёр #12 · Загружен сегодня</small></div>
+            <div style="display:flex;gap:8px;">
+                <span class="status-badge status-pending">Новый</span>
+                <button class="btn-card-small" onclick="verifyDocument(1)">✅ Верифицировать</button>
+            </div>
+        </div>
+        <div class="doc-item">
+            <div><strong>Справка</strong><br><small style="color:#6b7280;">Волонтёр #8 · Загружен вчера</small></div>
+            <div style="display:flex;gap:8px;">
+                <span class="status-badge status-approved">Верифицирован</span>
+            </div>
+        </div>`;
+}
+
+async function verifyDocument(docId) {
+    try {
+        const r = await fetch(`${API_URL}/documents/${docId}/verify`, { method: 'POST', headers: authHeaders() });
+        const d = await r.json();
+        showToast(d.message  'Документ верифицирован');
+        loadDocuments();
+    } catch(e) { showToast('Ошибка верификации', false); }
+}
+
+// ── CURATOR: analytics (UC-18) ───────────────────────────────────────────────
+async function loadAnalytics() {
+    const c = document.getElementById('analyticsGrid');
+    try {
+        const r = await fetch(${API_URL}/analytics/summary, { headers: authHeaders() });
+        const d = await r.json();
+        c.innerHTML = `
+            <div class="analytics-card"><div class="analytics-number">${d.total_volunteers  0}</div><div class="analytics-label">Волонтёров</div></div>
+            <div class="analytics-card"><div class="analytics-number">${d.active_tasks  0}</div><div class="analytics-label">Открытых задач</div></div>
+            <div class="analytics-card"><div class="analytics-number">${d.completed_reports  0}</div><div class="analytics-label">Принятых отчётов</div></div>
+            <div class="analytics-card"><div class="analytics-number">${d.pending_reports  0}</div><div class="analytics-label">На проверке</div></div>
+            <div class="analytics-card"><div class="analytics-number">${(d.avg_hours_per_task || 0).toFixed(1)}</div><div class="analytics-label">Ср. часов / задача</div></div>`;
+    } catch(e) { c.innerHTML = '<p style="color:#dc2626;">Ошибка загрузки аналитики</p>'; }
+}
+
+// ── Nav helpers ───────────────────────────────────────────────────────────────
+
+function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function showProjects() { document.getElementById('projectsGrid').scrollIntoView({ behavior: 'smooth' }); }
+function showTasks()    { document.getElementById('tasksList').scrollIntoView({ behavior: 'smooth' }); }
+function showHelp()     { showNotification('Как помочь', '1. Зарегистрируйтесь\n2. Выберите задачу\n3. Выполните и подайте отчёт\n4. Получите благодарность!'); }
+function showContacts() { showNotification('Контакты', '📧 info@dobrygorod.ru\n📞 8 (800) 123-45-67'); }
+
+window.onclick = e => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+</script>
+</body>
+</html>
