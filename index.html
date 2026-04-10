@@ -397,7 +397,7 @@
             <div><h5 style="color:white;margin-bottom:15px;">Навигация</h5><a onclick="showProjects()">Проекты</a><a onclick="showTasks()">Задачи</a><a onclick="showContacts()">Контакты</a></div>
             <div><h5 style="color:white;margin-bottom:15px;">Контакты</h5><a href="mailto:info@dobrygorod.ru">info@dobrygorod.ru</a><a href="tel:88001234567">8 (800) 123-45-67</a></div>
         </div>
-        <hr><p class="copyright">© 2026 Добрый Город · Вместе мы можем больше</p>
+        <hr><p class="copyright">© 2025 Добрый Город · Вместе мы можем больше</p>
     </div>
 </footer>
 
@@ -429,19 +429,25 @@ function authHeaders() {
 
 function escapeHtml(str) {
     if (!str) return '';
-    return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    return String(str).replace(/[&<>"']/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        if (m === '"') return '&quot;';
+        return '&#39;';
+    });
 }
 
 function showToast(msg, ok) {
     if (ok === undefined) ok = true;
-    const t = document.getElementById('toast');
+    var t = document.getElementById('toast');
     t.style.background = ok ? '#2d6a4f' : '#dc2626';
     t.textContent = msg;
     t.style.display = 'block';
     setTimeout(function() { t.style.display = 'none'; }, 3000);
 }
 
-function openModal(id)  { document.getElementById(id).style.display = 'flex'; }
+function openModal(id) { document.getElementById(id).style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 function showNotification(title, msg) {
     document.getElementById('notificationTitle').textContent = title;
@@ -465,11 +471,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function loadStats() {
     try {
-        const r = await fetch(API_URL + '/api/stats');
-        const d = await r.json();
-        document.getElementById('volunteersCount').textContent = d.volunteers_count  0;
-        document.getElementById('tasksCompleted').textContent  = d.tasks_completed  d.completed_tasks  0;
-        document.getElementById('projectsCount').textContent   = d.projects_count  0;
+        var r = await fetch(API_URL + '/api/stats');
+        var d = await r.json();
+        document.getElementById('volunteersCount').textContent = d.volunteers_count || 0;
+        document.getElementById('tasksCompleted').textContent = d.tasks_completed || d.completed_tasks || 0;
+        document.getElementById('projectsCount').textContent = d.projects_count || 0;
     } catch(e) { console.error('Stats error:', e); }
 }
 
@@ -477,32 +483,35 @@ async function loadStats() {
 
 async function loadProjects() {
     try {
-        const r = await fetch(API_URL + '/api/projects');
+        var r = await fetch(API_URL + '/api/projects');
         projectsList = await r.json();
         if (!Array.isArray(projectsList)) projectsList = [];
         renderProjects();
     } catch(e) { renderProjectsFallback(); }
 }
 function renderProjects() {
-    const c = document.getElementById('projectsGrid');
+    var c = document.getElementById('projectsGrid');
     if (!projectsList.length) {
         c.innerHTML = '<div class="card"><div class="card-content">Проектов пока нет</div></div>';
         return;
     }
-    c.innerHTML = projectsList.map(function(p) {
-        return '<div class="card">' +
+    var html = '';
+    for (var i = 0; i < projectsList.length; i++) {
+        var p = projectsList[i];
+        html += '<div class="card">' +
             '<div class="card-img">🤝</div>' +
             '<div class="card-content">' +
-            '<h4 class="card-title">' + escapeHtml(p.title  'Проект') + '</h4>' +
-            '<p class="card-text">' + escapeHtml(p.description  'Описание проекта') + '</p>' +
-            '<div class="card-meta"><span>📅 ' + escapeHtml(p.status  'активен') + '</span></div>' +
+            '<h4 class="card-title">' + escapeHtml(p.title || 'Проект') + '</h4>' +
+            '<p class="card-text">' + escapeHtml(p.description || 'Описание проекта') + '</p>' +
+            '<div class="card-meta"><span>📅 ' + escapeHtml(p.status || 'активен') + '</span></div>' +
             '<button class="btn-card" onclick="showProjectDetails(' + p.id + ')">Подробнее</button>' +
             '</div></div>';
-    }).join('');
+    }
+    c.innerHTML = html;
 }
 
 function renderProjectsFallback() {
-    const c = document.getElementById('projectsGrid');
+    var c = document.getElementById('projectsGrid');
     if (!c.innerHTML) c.innerHTML =
         '<div class="card"><div class="card-img">🏥</div><div class="card-content"><h4 class="card-title">Помощь больницам</h4><p class="card-text">Поддержка медицинских учреждений</p><button class="btn-card" onclick="showNotification(\'Информация\',\'Проект в разработке\')">Подробнее</button></div></div>' +
         '<div class="card"><div class="card-img">🌳</div><div class="card-content"><h4 class="card-title">Зелёный город</h4><p class="card-text">Озеленение парков</p><button class="btn-card" onclick="showNotification(\'Информация\',\'Проект в разработке\')">Подробнее</button></div></div>';
@@ -512,7 +521,7 @@ function renderProjectsFallback() {
 
 async function loadTasks() {
     try {
-        const r = await fetch(API_URL + '/api/tasks');
+        var r = await fetch(API_URL + '/api/tasks');
         tasksList = await r.json();
         if (!Array.isArray(tasksList)) tasksList = [];
         renderTasksList();
@@ -520,51 +529,57 @@ async function loadTasks() {
 }
 
 function renderTasksList() {
-    const category  = document.getElementById('filterCategory').value  'all';
-    const load      = document.getElementById('filterLoad').value  'all';
-    const when      = document.getElementById('filterWhen').value  'all';
-    const today     = new Date().toISOString().slice(0,10);
-    const weekLater = new Date(); weekLater.setDate(weekLater.getDate() + 7);
-    const weekStr   = weekLater.toISOString().slice(0,10);
+    var category = document.getElementById('filterCategory').value || 'all';
+    var load = document.getElementById('filterLoad').value || 'all';
+    var when = document.getElementById('filterWhen').value || 'all';
+    var today = new Date().toISOString().slice(0,10);
+    var weekLater = new Date();
+    weekLater.setDate(weekLater.getDate() + 7);
+    var weekStr = weekLater.toISOString().slice(0,10);
 
-    const filtered = tasksList.filter(function(t) {
-        if (category !== 'all' && t.category !== category) return false;
-        if (load     !== 'all' && t.load     !== load)     return false;
-        if (when === 'today' && t.event_date !== today)    return false;
-        if (when === 'week'  && (t.event_date < today  t.event_date > weekStr)) return false;
-        return true;
-    });
+    var filtered = [];
+    for (var i = 0; i < tasksList.length; i++) {
+        var t = tasksList[i];
+        if (category !== 'all' && t.category !== category) continue;
+        if (load !== 'all' && t.load !== load) continue;
+        if (when === 'today' && t.event_date !== today) continue;
+        if (when === 'week' && (t.event_date < today || t.event_date > weekStr)) continue;
+        filtered.push(t);
+    }
 
-    const c = document.getElementById('tasksList');
+    var c = document.getElementById('tasksList');
     if (!filtered.length) {
         c.innerHTML = '<div class="no-tasks">😕 Задачи не найдены. Попробуйте изменить фильтры.</div>';
         return;
     }
-    c.innerHTML = filtered.map(function(t) {
-        return '<div class="task-item">' +
+    var html = '';
+    for (var i = 0; i < filtered.length; i++) {
+        var t = filtered[i];
+        html += '<div class="task-item">' +
             '<div class="task-info">' +
-            '<h4>' + escapeHtml(t.title  'Задача') + '</h4>' +
-            '<small>📅 ' + escapeHtml(t.event_date  'Дата не указана') + '</small>' +
-            '<small>📍 ' + escapeHtml(t.location  'Место не указано') + '</small>' +
-            '<div><span class="task-tag">👥 ' + (t.needed_people  5) + ' чел.</span></div>' +
+            '<h4>' + escapeHtml(t.title || 'Задача') + '</h4>' +
+            '<small>📅 ' + escapeHtml(t.event_date || 'Дата не указана') + '</small>' +
+            '<small>📍 ' + escapeHtml(t.location || 'Место не указано') + '</small>' +
+            '<div><span class="task-tag">👥 ' + (t.needed_people || 5) + ' чел.</span></div>' +
             '</div>' +
             '<div style="display:flex;gap:8px;align-items:center;">' +
-            '<span class="task-badge">нужно ' + (t.needed_people  5) + ' чел.</span>' +
+            '<span class="task-badge">нужно ' + (t.needed_people || 5) + ' чел.</span>' +
             '<button class="btn-card-small" onclick="joinTask(' + t.id + ')">Записаться</button>' +
             '</div></div>';
-    }).join('');
+    }
+    c.innerHTML = html;
 }
 function renderTasksFallback() {
-    const c = document.getElementById('tasksList');
+    var c = document.getElementById('tasksList');
     if (!c.innerHTML) c.innerHTML =
         '<div class="task-item"><div class="task-info"><h4>Субботник в парке</h4><small>📅 Завтра</small><small>📍 Центральный парк</small></div><div><button class="btn-card-small" onclick="showNotification(\'Запись\',\'Войдите в систему\')">Записаться</button></div></div>';
 }
 
-function applyFilters()  { renderTasksList(); }
+function applyFilters() { renderTasksList(); }
 function resetFilters() {
-    ['filterCategory','filterLoad','filterWhen'].forEach(function(id) {
-        document.getElementById(id).value = 'all';
-    });
+    document.getElementById('filterCategory').value = 'all';
+    document.getElementById('filterLoad').value = 'all';
+    document.getElementById('filterWhen').value = 'all';
     document.getElementById('distanceSlider').value = '50';
     document.getElementById('distanceValue').textContent = 'до 50 км';
     renderTasksList();
@@ -573,60 +588,60 @@ function resetFilters() {
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
 async function registerUser() {
-    const email    = document.getElementById('regEmail').value.trim();
-    const password = document.getElementById('regPassword').value;
-    const role     = document.getElementById('regRole').value;
-    if (!email  !password) { showToast('Email и пароль обязательны', false); return; }
+    var email = document.getElementById('regEmail').value.trim();
+    var password = document.getElementById('regPassword').value;
+    var role = document.getElementById('regRole').value;
+    if (!email || !password) { showToast('Email и пароль обязательны', false); return; }
     try {
-        const r = await fetch(API_URL + '/auth/register', {
+        var r = await fetch(API_URL + '/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, name: email.split('@')[0], role })
+            body: JSON.stringify({ email: email, password: password, name: email.split('@')[0], role: role })
         });
-        const d = await r.json();
-        if (r.status === 201  d.message) {
+        var d = await r.json();
+        if (r.status === 201 || d.message) {
             showToast('Регистрация успешна!');
             closeModal('registerModal');
             openModal('loginModal');
         } else {
-            showToast(d.detail  d.message  'Ошибка регистрации', false);
+            showToast(d.detail || d.message || 'Ошибка регистрации', false);
         }
     } catch(e) { showToast('Ошибка соединения с сервером', false); }
 }
 
 async function loginUser() {
-    const email    = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    if (!email  !password) { showToast('Введите email и пароль', false); return; }
+    var email = document.getElementById('loginEmail').value.trim();
+    var password = document.getElementById('loginPassword').value;
+    if (!email || !password) { showToast('Введите email и пароль', false); return; }
     try {
-        const r = await fetch(API_URL + '/api/login', {
+        var r = await fetch(API_URL + '/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email: email, password: password })
         });
-        const d = await r.json();
-        if (r.ok && (d.access_token  d.token)) {
-const token = d.access_token  d.token;
+        var d = await r.json();
+        if (r.ok && (d.access_token || d.token)) {
+            var token = d.access_token || d.token;
             localStorage.setItem('token', token);
             localStorage.setItem('userEmail', email);
-            localStorage.setItem('userRole', (d.user && d.user.role)  d.role  'volunteer');
+            localStorage.setItem('userRole', (d.user && d.user.role) || d.role || 'volunteer');
             showToast('Вход выполнен!');
             closeModal('loginModal');
             await checkAuth();
         } else {
-            showToast(d.detail  d.message  'Неверный email или пароль', false);
+            showToast(d.detail || d.message || 'Неверный email или пароль', false);
         }
     } catch(e) { showToast('Ошибка соединения с сервером', false); }
 }
 
 async function checkAuth() {
-    const token = getToken();
-    const email = localStorage.getItem('userEmail');
-    const role  = localStorage.getItem('userRole');
+    var token = getToken();
+    var email = localStorage.getItem('userEmail');
+    var role = localStorage.getItem('userRole');
     if (token && email) {
-        currentUser = { email, role };
+        currentUser = { email: email, role: role };
         updateUI();
-        if (role === 'curator'  role === 'organizer'  role === 'admin') {
+        if (role === 'curator' || role === 'organizer' || role === 'admin') {
             document.getElementById('curatorPanel').style.display = 'block';
             loadApplications();
             loadTaskApplications('pending', null);
@@ -642,17 +657,17 @@ async function checkAuth() {
 }
 
 function updateUI() {
-    const authDiv = document.getElementById('authButtons');
-    const userDiv = document.getElementById('userMenu');
-    const emailEl = document.getElementById('userEmailDisplay');
-    const badgeEl = document.getElementById('userRoleBadge');
+    var authDiv = document.getElementById('authButtons');
+    var userDiv = document.getElementById('userMenu');
+    var emailEl = document.getElementById('userEmailDisplay');
+    var badgeEl = document.getElementById('userRoleBadge');
     if (currentUser) {
         authDiv.style.display = 'none';
         userDiv.style.display = 'block';
-        emailEl.textContent   = currentUser.email;
-        const ri = roleNames[currentUser.role]  roleNames.volunteer;
-        badgeEl.textContent   = ri.name;
-        badgeEl.className     = 'role-badge ' + ri.cls;
+        emailEl.textContent = currentUser.email;
+        var ri = roleNames[currentUser.role] || roleNames.volunteer;
+        badgeEl.textContent = ri.name;
+        badgeEl.className = 'role-badge ' + ri.cls;
     } else {
         authDiv.style.display = 'flex';
         userDiv.style.display = 'none';
@@ -664,8 +679,8 @@ function logout() {
     currentUser = null;
     updateUI();
     document.getElementById('curatorPanel').style.display = 'none';
-    if (checkinInterval)  clearInterval(checkinInterval);
-    if (reportsInterval)  clearInterval(reportsInterval);
+    if (checkinInterval) clearInterval(checkinInterval);
+    if (reportsInterval) clearInterval(reportsInterval);
     if (taskAppsInterval) clearInterval(taskAppsInterval);
     showToast('Вы вышли из системы');
 }
@@ -674,29 +689,35 @@ function logout() {
 
 function joinTask(taskId) {
     if (!currentUser) { showToast('Сначала войдите в систему', false); openModal('loginModal'); return; }
-    const task = tasksList.find(function(t) { return t.id === taskId; });
+    var task = null;
+    for (var i = 0; i < tasksList.length; i++) {
+        if (tasksList[i].id === taskId) { task = tasksList[i]; break; }
+    }
     document.getElementById('joinTaskId').value = taskId;
     document.getElementById('joinTaskInfo').textContent = 'Записаться на задачу "' + (task ? task.title : taskId) + '"?';
     openModal('joinTaskModal');
 }
 async function confirmJoinTask() {
-    const taskId = document.getElementById('joinTaskId').value;
+    var taskId = document.getElementById('joinTaskId').value;
     try {
-        const r = await fetch(API_URL + '/api/tasks/' + taskId + '/apply', {
+        var r = await fetch(API_URL + '/api/tasks/' + taskId + '/apply', {
             method: 'POST',
             headers: authHeaders(),
             body: JSON.stringify({ message: 'Хочу помочь!' })
         });
-        const d = await r.json();
-        if (d.success  r.ok) { showToast('Вы успешно записаны!'); closeModal('joinTaskModal'); }
-        else showToast(d.message  d.detail  'Ошибка записи', false);
+        var d = await r.json();
+        if (d.success || r.ok) { showToast('Вы успешно записаны!'); closeModal('joinTaskModal'); }
+        else showToast(d.message || d.detail || 'Ошибка записи', false);
     } catch(e) { showToast('Ошибка соединения', false); }
 }
 
 // ── Project details ───────────────────────────────────────────────────────────
 
 function showProjectDetails(projectId) {
-    const p = projectsList.find(function(x) { return x.id === projectId; });
+    var p = null;
+    for (var i = 0; i < projectsList.length; i++) {
+        if (projectsList[i].id === projectId) { p = projectsList[i]; break; }
+    }
     document.getElementById('projectDetailTitle').textContent = p ? p.title : 'Проект';
     document.getElementById('projectDetailContent').innerHTML = '<p>' + escapeHtml(p ? p.description : '') + '</p>';
     document.getElementById('projectTasksList').innerHTML = '<h4>📋 Задачи:</h4><p>Загрузка...</p>';
@@ -705,10 +726,11 @@ function showProjectDetails(projectId) {
         .then(function(r) { return r.json(); })
         .then(function(tasks) {
             if (tasks && tasks.length) {
-                document.getElementById('projectTasksList').innerHTML = '<h4>📋 Задачи:</h4>' +
-                    tasks.map(function(t) {
-                        return '<div class="project-task-item"><strong>📌 ' + escapeHtml(t.title) + '</strong><br><small>' + (t.event_date  '') + '</small></div>';
-                    }).join('');
+                var html = '<h4>📋 Задачи:</h4>';
+                for (var i = 0; i < tasks.length; i++) {
+                    html += '<div class="project-task-item"><strong>📌 ' + escapeHtml(tasks[i].title) + '</strong><br><small>' + (tasks[i].event_date || '') + '</small></div>';
+                }
+                document.getElementById('projectTasksList').innerHTML = html;
             } else {
                 document.getElementById('projectTasksList').innerHTML = '<h4>📋 Задачи:</h4><p>Нет активных задач</p>';
             }
@@ -720,34 +742,38 @@ function showProjectDetails(projectId) {
 // ── CURATOR: tabs ─────────────────────────────────────────────────────────────
 
 function showCuratorTab(name, btn) {
-    document.querySelectorAll('.curator-section').forEach(function(s) { s.classList.remove('active'); });
-    document.querySelectorAll('.curator-tab').forEach(function(t) { t.classList.remove('active'); });
+    var sections = document.querySelectorAll('.curator-section');
+    for (var i = 0; i < sections.length; i++) sections[i].classList.remove('active');
+    var tabs = document.querySelectorAll('.curator-tab');
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
     document.getElementById('section-' + name).classList.add('active');
     if (btn) btn.classList.add('active');
-    if (name === 'applications')      loadApplications();
+    if (name === 'applications') loadApplications();
     if (name === 'task-applications') loadTaskApplications('pending', null);
-    if (name === 'reports')           loadReports();
-    if (name === 'checkins')          loadCheckins();
-    if (name === 'documents')         loadDocuments();
-    if (name === 'analytics')         loadAnalytics();
+    if (name === 'reports') loadReports();
+    if (name === 'checkins') loadCheckins();
+    if (name === 'documents') loadDocuments();
+    if (name === 'analytics') loadAnalytics();
 }
 
 // ── CURATOR: general applications ────────────────────────────────────────────
 async function loadApplications() {
-    const c = document.getElementById('applicationsList');
+    var c = document.getElementById('applicationsList');
     c.innerHTML = '<p style="color:#6b7280;">Загрузка...</p>';
     try {
-        const r = await fetch(API_URL + '/applications/for-curator', { headers: authHeaders() });
-        const apps = await r.json();
-        if (!Array.isArray(apps)  !apps.length) {
+        var r = await fetch(API_URL + '/applications/for-curator', { headers: authHeaders() });
+        var apps = await r.json();
+        if (!Array.isArray(apps) || !apps.length) {
             c.innerHTML = '<div class="empty-state">📭 Нет новых заявок</div>';
             return;
         }
-        c.innerHTML = apps.map(function(a) {
-            return '<div class="app-item">' +
+        var html = '';
+        for (var i = 0; i < apps.length; i++) {
+            var a = apps[i];
+            html += '<div class="app-item">' +
                 '<div class="app-info">' +
-                '<h4>' + escapeHtml(a.user_name  'Волонтёр') + '</h4>' +
-                '<small>Задача: ' + escapeHtml(a.task_title  '—') + '</small>' +
+                '<h4>' + escapeHtml(a.user_name || 'Волонтёр') + '</h4>' +
+                '<small>Задача: ' + escapeHtml(a.task_title || '—') + '</small>' +
                 (a.message ? '<br><small>💬 ' + escapeHtml(a.message) + '</small>' : '') +
                 '</div>' +
                 '<div class="app-actions">' +
@@ -755,24 +781,25 @@ async function loadApplications() {
                 '<button class="btn-card-small" onclick="approveApplication(' + a.id + ')">✅ Одобрить</button>' +
                 '<button class="btn-danger-small" onclick="rejectApplication(' + a.id + ')">❌ Отклонить</button>' +
                 '</div></div>';
-        }).join('');
+        }
+        c.innerHTML = html;
     } catch(e) { c.innerHTML = '<p style="color:#dc2626;">Ошибка загрузки</p>'; }
 }
 
 async function approveApplication(appId) {
     try {
-        const r = await fetch(API_URL + '/applications/' + appId + '/approve', { method: 'POST', headers: authHeaders() });
-        const d = await r.json();
-        showToast(d.message  'Заявка одобрена!');
+        var r = await fetch(API_URL + '/applications/' + appId + '/approve', { method: 'POST', headers: authHeaders() });
+        var d = await r.json();
+        showToast(d.message || 'Заявка одобрена!');
         loadApplications();
     } catch(e) { showToast('Ошибка', false); }
 }
 
 async function rejectApplication(appId) {
     try {
-        const r = await fetch(API_URL + '/applications/' + appId + '/reject', { method: 'POST', headers: authHeaders() });
-        const d = await r.json();
-        showToast(d.message  'Заявка отклонена');
+        var r = await fetch(API_URL + '/applications/' + appId + '/reject', { method: 'POST', headers: authHeaders() });
+        var d = await r.json();
+        showToast(d.message || 'Заявка отклонена');
         loadApplications();
     } catch(e) { showToast('Ошибка', false); }
 }
@@ -780,67 +807,80 @@ async function rejectApplication(appId) {
 // ── CURATOR: task applications (новая вкладка) ────────────────────────────────
 
 async function loadTaskApplications(statusFilter, filterBtn) {
-    // обновляем кнопки фильтра если нажата
     if (filterBtn) {
-        document.querySelectorAll('#section-task-applications .btn-filter').forEach(function(b) {
-            b.classList.remove('active');
-        });
+        var btns = document.querySelectorAll('#section-task-applications .btn-filter');
+        for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
         filterBtn.classList.add('active');
     }
 
-    const c = document.getElementById('taskApplicationsList');
+    var c = document.getElementById('taskApplicationsList');
     c.innerHTML = '<p style="color:#6b7280;">Загрузка...</p>';
 
     try {
-        // Получаем все задачи
-        const tasksR = await fetch(API_URL + '/api/tasks', { headers: authHeaders() });
-        const tasks  = await tasksR.json();
-        if (!Array.isArray(tasks)  !tasks.length) {
+        var tasksR = await fetch(API_URL + '/api/tasks', { headers: authHeaders() });
+        var tasks = await tasksR.json();
+        if (!Array.isArray(tasks) || !tasks.length) {
             c.innerHTML = '<div class="empty-state">📭 Нет задач</div>';
             return;
         }
 
-        // Получаем заявки (ожидающие)
-        const appsR  = await fetch(API_URL + '/applications/for-curator', { headers: authHeaders() });
-        const allApps = await appsR.json();
-        const apps   = Array.isArray(allApps) ? allApps : [];
-// Фильтруем по статусу
-        const filtered = statusFilter === 'all' ? apps :
-                         statusFilter === 'approved' ? apps.filter(function(a) { return a.status === 'approved'; }) :
-                         apps.filter(function(a) { return !a.status  a.status === 'pending'; });
+        var appsR = await fetch(API_URL + '/applications/for-curator', { headers: authHeaders() });
+        var allApps = await appsR.json();
+        var apps = Array.isArray(allApps) ? allApps : [];
+        
+        var filtered = [];
+        if (statusFilter === 'all') filtered = apps;
+        else if (statusFilter === 'approved') {
+            for (var i = 0; i < apps.length; i++) {
+                if (apps[i].status === 'approved') filtered.push(apps[i]);
+            }
+        } else {
+            for (var i = 0; i < apps.length; i++) {
+                if (!apps[i].status || apps[i].status === 'pending') filtered.push(apps[i]);
+            }
+        }
 
         if (!filtered.length) {
-            c.innerHTML = '<div class="empty-state">📭 ' +
-                (statusFilter === 'pending' ? 'Нет заявок, ожидающих проверки' :
-                 statusFilter === 'approved' ? 'Нет одобренных заявок' : 'Нет заявок') + '</div>';
+            var msg = '';
+            if (statusFilter === 'pending') msg = 'Нет заявок, ожидающих проверки';
+            else if (statusFilter === 'approved') msg = 'Нет одобренных заявок';
+            else msg = 'Нет заявок';
+            c.innerHTML = '<div class="empty-state">📭 ' + msg + '</div>';
             return;
         }
 
-        // Группируем по задачам
-        const byTask = {};
-        filtered.forEach(function(a) {
-            const tid = a.task_id  0;
-            if (!byTask[tid]) byTask[tid] = { title: a.task_title  ('Задача #' + tid), apps: [] };
+        var byTask = {};
+        for (var i = 0; i < filtered.length; i++) {
+            var a = filtered[i];
+            var tid = a.task_id || 0;
+            if (!byTask[tid]) byTask[tid] = { title: a.task_title || ('Задача #' + tid), apps: [] };
             byTask[tid].apps.push(a);
-        });
+        }
 
-        c.innerHTML = Object.keys(byTask).map(function(tid) {
-            const group = byTask[tid];
-            const count = group.apps.length;
-            const rows  = group.apps.map(function(a) {
-                const isPending  = !a.status  a.status === 'pending';
-                const statusHtml = isPending
-                    ? '<span class="status-badge status-pending">⏳ Ожидает</span>'
-                    : a.status === 'approved'
-                        ? '<span class="status-badge status-approved">✅ Одобрен</span>'
-                        : '<span class="status-badge status-rejected">❌ Отклонён</span>';
-                const actionsHtml = isPending
-                    ? '<button class="btn-card-small" onclick="approveTaskApp(' + a.id + ', this)">✅ Принять</button>' +
-                      '<button class="btn-danger-small" onclick="rejectTaskApp(' + a.id + ', this)">❌ Отклонить</button>'
-                    : '';
-                return '<div class="volunteer-row" id="app-row-' + a.id + '">' +
+        var html = '';
+        var taskIds = Object.keys(byTask);
+        for (var ti = 0; ti < taskIds.length; ti++) {
+            var tid = taskIds[ti];
+            var group = byTask[tid];
+            var count = group.apps.length;
+            var rows = '';
+            for (var ai = 0; ai < group.apps.length; ai++) {
+                var a = group.apps[ai];
+                var isPending = !a.status || a.status === 'pending';
+                var statusHtml = '';
+                var actionsHtml = '';
+                if (isPending) {
+                    statusHtml = '<span class="status-badge status-pending">⏳ Ожидает</span>';
+                    actionsHtml = '<button class="btn-card-small" onclick="approveTaskApp(' + a.id + ', this)">✅ Принять</button>' +
+                                  '<button class="btn-danger-small" onclick="rejectTaskApp(' + a.id + ', this)">❌ Отклонить</button>';
+                } else if (a.status === 'approved') {
+                    statusHtml = '<span class="status-badge status-approved">✅ Одобрен</span>';
+                } else {
+                    statusHtml = '<span class="status-badge status-rejected">❌ Отклонён</span>';
+                }
+                rows += '<div class="volunteer-row" id="app-row-' + a.id + '">' +
                     '<div>' +
-                    '<div class="volunteer-name">👤 ' + escapeHtml(a.user_name  'Волонтёр') + '</div>' +
+                    '<div class="volunteer-name">👤 ' + escapeHtml(a.user_name || 'Волонтёр') + '</div>' +
                     '<div class="volunteer-meta">' +
                         (a.user_email ? '✉️ ' + escapeHtml(a.user_email) + ' · ' : '') +
                         (a.message ? '💬 ' + escapeHtml(a.message) : 'Без сообщения') +
@@ -848,9 +888,8 @@ async function loadTaskApplications(statusFilter, filterBtn) {
                     '</div>' +
                     '<div class="task-app-actions">' + statusHtml + actionsHtml + '</div>' +
                     '</div>';
-            }).join('');
-
-            return '<div class="task-app-item">' +
+            }
+            html += '<div class="task-app-item">' +
                 '<div class="task-app-header">' +
                 '<div>' +
                 '<div class="task-app-title">📌 ' + escapeHtml(group.title) + '</div>' +
@@ -862,8 +901,8 @@ async function loadTaskApplications(statusFilter, filterBtn) {
                 '</div>' +
                 '<div class="volunteers-list" id="vlist-' + tid + '">' + rows + '</div>' +
                 '</div>';
-        }).join('');
-
+        }
+        c.innerHTML = html;
     } catch(e) {
         c.innerHTML = '<p style="color:#dc2626;">Ошибка загрузки заявок</p>';
         console.error(e);
@@ -871,8 +910,8 @@ async function loadTaskApplications(statusFilter, filterBtn) {
 }
 
 function toggleVolunteers(tid) {
-    const list = document.getElementById('vlist-' + tid);
-    const btn  = list.previousElementSibling.querySelector('.task-toggle-btn');
+    var list = document.getElementById('vlist-' + tid);
+    var btn = list.previousElementSibling.querySelector('.task-toggle-btn');
     if (list.classList.contains('open')) {
         list.classList.remove('open');
         btn.textContent = 'Показать ▾';
@@ -886,18 +925,17 @@ async function approveTaskApp(appId, btn) {
     btn.disabled = true;
     btn.textContent = '...';
     try {
-        const r = await fetch(API_URL + '/applications/' + appId + '/approve', { method: 'POST', headers: authHeaders() });
-        const d = await r.json();
+        var r = await fetch(API_URL + '/applications/' + appId + '/approve', { method: 'POST', headers: authHeaders() });
+        var d = await r.json();
         if (r.ok) {
-            showToast(d.message  'Заявка одобрена! Волонтёр назначен на задачу.');
-// Обновляем строку без перезагрузки всего списка
-            const row = document.getElementById('app-row-' + appId);
+            showToast(d.message || 'Заявка одобрена! Волонтёр назначен на задачу.');
+            var row = document.getElementById('app-row-' + appId);
             if (row) {
-                const actions = row.querySelector('.task-app-actions');
+                var actions = row.querySelector('.task-app-actions');
                 actions.innerHTML = '<span class="status-badge status-approved">✅ Одобрен</span>';
             }
         } else {
-            showToast(d.detail  d.message  'Ошибка', false);
+            showToast(d.detail || d.message || 'Ошибка', false);
             btn.disabled = false;
             btn.textContent = '✅ Принять';
         }
@@ -912,12 +950,12 @@ async function rejectTaskApp(appId, btn) {
     btn.disabled = true;
     btn.textContent = '...';
     try {
-        const r = await fetch(API_URL + '/applications/' + appId + '/reject', { method: 'POST', headers: authHeaders() });
-        const d = await r.json();
-        showToast(d.message  'Заявка отклонена');
-        const row = document.getElementById('app-row-' + appId);
+        var r = await fetch(API_URL + '/applications/' + appId + '/reject', { method: 'POST', headers: authHeaders() });
+        var d = await r.json();
+        showToast(d.message || 'Заявка отклонена');
+        var row = document.getElementById('app-row-' + appId);
         if (row) {
-            const actions = row.querySelector('.task-app-actions');
+            var actions = row.querySelector('.task-app-actions');
             actions.innerHTML = '<span class="status-badge status-rejected">❌ Отклонён</span>';
         }
     } catch(e) {
@@ -930,7 +968,6 @@ async function rejectTaskApp(appId, btn) {
 function startTaskAppsPolling() {
     if (taskAppsInterval) clearInterval(taskAppsInterval);
     taskAppsInterval = setInterval(function() {
-        // Автообновляем только если вкладка "На задачи" активна
         if (document.getElementById('section-task-applications').classList.contains('active')) {
             loadTaskApplications('pending', null);
         }
@@ -940,20 +977,22 @@ function startTaskAppsPolling() {
 // ── CURATOR: reports ──────────────────────────────────────────────────────────
 
 async function loadReports() {
-    const c = document.getElementById('reportsList');
+    var c = document.getElementById('reportsList');
     c.innerHTML = '<p style="color:#6b7280;">Загрузка...</p>';
     try {
-        const r = await fetch(API_URL + '/api/reports/pending', { headers: authHeaders() });
-        const reports = await r.json();
-        if (!Array.isArray(reports)  !reports.length) {
+        var r = await fetch(API_URL + '/api/reports/pending', { headers: authHeaders() });
+        var reports = await r.json();
+        if (!Array.isArray(reports) || !reports.length) {
             c.innerHTML = '<div class="empty-state">📭 Нет отчётов на проверке</div>';
             return;
         }
-        c.innerHTML = reports.map(function(rep) {
-            return '<div class="app-item">' +
+        var html = '';
+        for (var i = 0; i < reports.length; i++) {
+            var rep = reports[i];
+            html += '<div class="app-item">' +
                 '<div class="app-info">' +
-                '<h4>' + escapeHtml(rep.user_name  'Волонтёр') + '</h4>' +
-                '<small>⏱️ ' + (rep.hours  0) + ' часов · 💬 ' + escapeHtml(rep.comment  '—') + '</small><br>' +
+                '<h4>' + escapeHtml(rep.user_name || 'Волонтёр') + '</h4>' +
+                '<small>⏱️ ' + (rep.hours || 0) + ' часов · 💬 ' + escapeHtml(rep.comment || '—') + '</small><br>' +
                 (rep.photo_url ? '<img src="' + API_URL + rep.photo_url + '" class="report-photo" onerror="this.style.display=\'none\'">' : '') +
                 '</div>' +
                 '<div class="app-actions">' +
@@ -961,24 +1000,25 @@ async function loadReports() {
                 '<button class="btn-card-small" onclick="approveReport(' + rep.id + ')">✅ Принять</button>' +
                 '<button class="btn-danger-small" onclick="rejectReport(' + rep.id + ')">❌ Отклонить</button>' +
                 '</div></div>';
-        }).join('');
+        }
+        c.innerHTML = html;
     } catch(e) { c.innerHTML = '<p style="color:#dc2626;">Ошибка загрузки</p>'; }
 }
 
 async function approveReport(repId) {
     try {
-        const r = await fetch(API_URL + '/api/reports/' + repId + '/approve', { method: 'POST', headers: authHeaders() });
-        const d = await r.json();
-        showToast(d.message  'Отчёт принят, баллы начислены (BR-09)');
+        var r = await fetch(API_URL + '/api/reports/' + repId + '/approve', { method: 'POST', headers: authHeaders() });
+        var d = await r.json();
+        showToast(d.message || 'Отчёт принят, баллы начислены (BR-09)');
         loadReports();
     } catch(e) { showToast('Ошибка', false); }
 }
 async function rejectReport(repId) {
     try {
-        const r = await fetch(API_URL + '/api/reports/' + repId + '/reject', { method: 'POST', headers: authHeaders() });
-        const d = await r.json();
+        var r = await fetch(API_URL + '/api/reports/' + repId + '/reject', { method: 'POST', headers: authHeaders() });
+        var d = await r.json();
         if (d.warn_block) showToast('⚠️ ' + d.warn_message, false);
-        else showToast(d.message  'Отчёт отклонён');
+        else showToast(d.message || 'Отчёт отклонён');
         loadReports();
     } catch(e) { showToast('Ошибка', false); }
 }
@@ -991,22 +1031,25 @@ function startReportsPolling() {
 // ── CURATOR: checkins ─────────────────────────────────────────────────────────
 
 async function loadCheckins() {
-    const c = document.getElementById('checkinsList');
+    var c = document.getElementById('checkinsList');
     try {
-        const r = await fetch(API_URL + '/checkins', { headers: authHeaders() });
-        const data = await r.json();
-        if (!Array.isArray(data)  !data.length) {
+        var r = await fetch(API_URL + '/checkins', { headers: authHeaders() });
+        var data = await r.json();
+        if (!Array.isArray(data) || !data.length) {
             c.innerHTML = '<div class="empty-state">📭 Нет отметок о явке</div>';
             return;
         }
-        c.innerHTML = data.map(function(ch) {
-            return '<div class="checkin-live">' +
+        var html = '';
+        for (var i = 0; i < data.length; i++) {
+            var ch = data[i];
+            html += '<div class="checkin-live">' +
                 '<div class="checkin-dot"></div>' +
-                '<strong>' + escapeHtml(ch.user_name  'Волонтёр') + '</strong>' +
-                '<span style="color:#6b7280;margin-left:8px;">→ ' + escapeHtml(ch.task_title  '—') + '</span>' +
+                '<strong>' + escapeHtml(ch.user_name || 'Волонтёр') + '</strong>' +
+                '<span style="color:#6b7280;margin-left:8px;">→ ' + escapeHtml(ch.task_title || '—') + '</span>' +
                 '<span style="margin-left:auto;color:#22c55e;font-size:13px;">✓ checked in</span>' +
                 '</div>';
-        }).join('');
+        }
+        c.innerHTML = html;
     } catch(e) { c.innerHTML = '<div class="empty-state">Нет данных о явке</div>'; }
 }
 
@@ -1018,7 +1061,7 @@ function startCheckinPolling() {
 // ── CURATOR: documents ────────────────────────────────────────────────────────
 
 async function loadDocuments() {
-    const c = document.getElementById('documentsList');
+    var c = document.getElementById('documentsList');
     c.innerHTML = '<p style="color:#6b7280;">Загрузка...</p>';
     c.innerHTML =
         '<div class="doc-item"><div><strong>Паспорт</strong><br><small style="color:#6b7280;">Волонтёр #12 · Загружен сегодня</small></div><div style="display:flex;gap:8px;"><span class="status-badge status-pending">Новый</span><button class="btn-card-small" onclick="verifyDocument(1)">✅ Верифицировать</button></div></div>' +
@@ -1026,9 +1069,9 @@ async function loadDocuments() {
 }
 async function verifyDocument(docId) {
     try {
-        const r = await fetch(API_URL + '/documents/' + docId + '/verify', { method: 'POST', headers: authHeaders() });
-        const d = await r.json();
-        showToast(d.message  'Документ верифицирован');
+        var r = await fetch(API_URL + '/documents/' + docId + '/verify', { method: 'POST', headers: authHeaders() });
+        var d = await r.json();
+        showToast(d.message || 'Документ верифицирован');
         loadDocuments();
     } catch(e) { showToast('Ошибка верификации', false); }
 }
@@ -1036,16 +1079,16 @@ async function verifyDocument(docId) {
 // ── CURATOR: analytics ────────────────────────────────────────────────────────
 
 async function loadAnalytics() {
-    const c = document.getElementById('analyticsGrid');
+    var c = document.getElementById('analyticsGrid');
     try {
-        const r = await fetch(API_URL + '/analytics/summary', { headers: authHeaders() });
-        const d = await r.json();
+        var r = await fetch(API_URL + '/analytics/summary', { headers: authHeaders() });
+        var d = await r.json();
         c.innerHTML =
-            '<div class="analytics-card"><div class="analytics-number">' + (d.total_volunteers  0) + '</div><div class="analytics-label">Волонтёров</div></div>' +
-            '<div class="analytics-card"><div class="analytics-number">' + (d.active_tasks  0) + '</div><div class="analytics-label">Открытых задач</div></div>' +
-            '<div class="analytics-card"><div class="analytics-number">' + (d.completed_reports  0) + '</div><div class="analytics-label">Принятых отчётов</div></div>' +
-            '<div class="analytics-card"><div class="analytics-number">' + (d.pending_reports  0) + '</div><div class="analytics-label">На проверке</div></div>' +
-            '<div class="analytics-card"><div class="analytics-number">' + ((d.avg_hours_per_task  0).toFixed(1)) + '</div><div class="analytics-label">Ср. часов / задача</div></div>';
+            '<div class="analytics-card"><div class="analytics-number">' + (d.total_volunteers || 0) + '</div><div class="analytics-label">Волонтёров</div></div>' +
+            '<div class="analytics-card"><div class="analytics-number">' + (d.active_tasks || 0) + '</div><div class="analytics-label">Открытых задач</div></div>' +
+            '<div class="analytics-card"><div class="analytics-number">' + (d.completed_reports || 0) + '</div><div class="analytics-label">Принятых отчётов</div></div>' +
+            '<div class="analytics-card"><div class="analytics-number">' + (d.pending_reports || 0) + '</div><div class="analytics-label">На проверке</div></div>' +
+            '<div class="analytics-card"><div class="analytics-number">' + ((d.avg_hours_per_task || 0).toFixed(1)) + '</div><div class="analytics-label">Ср. часов / задача</div></div>';
     } catch(e) { c.innerHTML = '<p style="color:#dc2626;">Ошибка загрузки аналитики</p>'; }
 }
 
@@ -1053,11 +1096,11 @@ async function loadAnalytics() {
 
 function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 function showProjects() { document.getElementById('projectsGrid').scrollIntoView({ behavior: 'smooth' }); }
-function showTasks()    { document.getElementById('tasksList').scrollIntoView({ behavior: 'smooth' }); }
-function showHelp()     { showNotification('Как помочь', '1. Зарегистрируйтесь\n2. Выберите задачу\n3. Выполните и подайте отчёт\n4. Получите благодарность!'); }
+function showTasks() { document.getElementById('tasksList').scrollIntoView({ behavior: 'smooth' }); }
+function showHelp() { showNotification('Как помочь', '1. Зарегистрируйтесь\n2. Выберите задачу\n3. Выполните и подайте отчёт\n4. Получите благодарность!'); }
 function showContacts() { showNotification('Контакты', '📧 info@dobrygorod.ru\n📞 8 (800) 123-45-67'); }
 
 window.onclick = function(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
 </script>
 </body>
-</html>  попробуй вставить
+</html>
