@@ -136,6 +136,27 @@
         .volunteers-list.open { display: block; }
         .empty-state { text-align: center; padding: 30px; color: #6b7280; font-size: 15px; }
 
+        /* ── TEAM ── */
+        .team-card { background: #f8f9fa; border: 1px solid #e8f5e9; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+        .team-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+        .team-name { font-size: 18px; font-weight: 700; color: #1e2f3a; }
+        .team-meta { font-size: 13px; color: #6b7280; margin-top: 4px; }
+        .team-members { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .member-chip { display: flex; align-items: center; gap: 6px; background: white; border: 1px solid #e0e0e0; border-radius: 20px; padding: 5px 12px; font-size: 13px; }
+        .member-chip button { background: none; border: none; color: #dc2626; cursor: pointer; font-size: 14px; padding: 0; line-height: 1; }
+        .create-team-form { background: white; border-radius: 16px; padding: 20px; border: 2px dashed #9c27b0; margin-bottom: 20px; }
+        .create-team-form input, .create-team-form textarea, .create-team-form select { width: 100%; padding: 10px 14px; margin-bottom: 10px; border: 1px solid #e0e0e0; border-radius: 10px; font-size: 14px; font-family: inherit; }
+        .add-member-row { display: flex; gap: 8px; margin-top: 8px; }
+        .add-member-row select { flex: 1; margin-bottom: 0; }
+        .btn-purple { background: #9c27b0; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+        .btn-purple:hover { background: #7b1fa2; }
+        .btn-purple-outline { background: none; color: #9c27b0; border: 2px solid #9c27b0; padding: 8px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+        .btn-purple-outline:hover { background: #9c27b0; color: white; }
+        .team-stats { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+        .team-stat { text-align: center; background: white; border-radius: 10px; padding: 8px 16px; border: 1px solid #e8f5e9; }
+        .team-stat-num { font-size: 20px; font-weight: 700; color: #9c27b0; }
+        .team-stat-lbl { font-size: 11px; color: #6b7280; }
+
         @media (max-width: 768px) {
             .hero h1 { font-size: 32px; }
             .filters-grid { flex-direction: column; }
@@ -274,6 +295,7 @@
             <button class="curator-tab" onclick="showCuratorTab('checkins', this)">📍 Явка</button>
             <button class="curator-tab" onclick="showCuratorTab('documents', this)">📁 Документы</button>
             <button class="curator-tab" onclick="showCuratorTab('analytics', this)">📊 Аналитика</button>
+            <button class="curator-tab" onclick="showCuratorTab('team', this)">👥 Команда</button>
         </div>
 
         <!-- Заявки (UC-12) -->
@@ -315,6 +337,38 @@
             <h3 style="margin-bottom:16px;">Верификация документов</h3>
             <button class="btn-filter" onclick="loadDocuments()" style="margin-bottom:16px;">🔄 Обновить</button>
             <div id="documentsList"><p style="color:#6b7280;">Загрузка...</p></div>
+        </div>
+
+        <!-- Команда куратора -->
+        <div class="curator-section" id="section-team">
+            <h3 style="margin-bottom:6px;">Управление командой</h3>
+            <p style="color:#6b7280;font-size:14px;margin-bottom:20px;">Создавайте команды и набирайте волонтёров из одобренных заявок</p>
+
+            <!-- Форма создания команды -->
+            <div class="create-team-form" id="createTeamForm" style="display:none;">
+                <h4 style="margin-bottom:14px;color:#9c27b0;">➕ Новая команда</h4>
+                <input type="text" id="teamName" placeholder="Название команды *" maxlength="100">
+                <textarea id="teamDesc" placeholder="Описание команды" rows="2"></textarea>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <select id="teamTaskId" style="flex:1;margin-bottom:0;padding:10px 14px;border:1px solid #e0e0e0;border-radius:10px;font-size:14px;">
+                        <option value="">— Привязать к задаче (необязательно) —</option>
+                    </select>
+                    <input type="number" id="teamMaxSize" placeholder="Макс. участников" min="1" max="100" style="width:160px;margin-bottom:0;">
+                </div>
+                <div style="display:flex;gap:10px;margin-top:12px;">
+                    <button class="btn-purple" onclick="createTeam()">✅ Создать команду</button>
+                    <button class="btn-purple-outline" onclick="toggleCreateTeamForm()">Отмена</button>
+                </div>
+            </div>
+
+            <!-- Кнопки управления -->
+            <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+                <button class="btn-purple" onclick="toggleCreateTeamForm()">➕ Создать команду</button>
+                <button class="btn-purple-outline" onclick="loadTeams()">🔄 Обновить</button>
+            </div>
+
+            <!-- Список команд -->
+            <div id="teamsList"><p style="color:#6b7280;">Загрузка...</p></div>
         </div>
 
         <!-- Аналитика -->
@@ -789,6 +843,7 @@ function showCuratorTab(name, btn) {
     if (name === 'checkins') loadCheckins();
     if (name === 'documents') loadDocuments();
     if (name === 'analytics') loadAnalytics();
+    if (name === 'team') loadTeams();
 }
 
 // ── CURATOR: general applications ────────────────────────────────────────────
@@ -1136,6 +1191,214 @@ function showHelp() { showNotification('Как помочь', '1. Зарегис
 function showContacts() { showNotification('Контакты', '📧 info@dobrygorod.ru\n📞 8 (800) 123-45-67'); }
 
 window.onclick = function(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+
+// ── TEAM MANAGEMENT ───────────────────────────────────────────────────────────
+
+var teamsData = [];
+var volunteersData = [];
+
+// Переключатель формы создания
+function toggleCreateTeamForm() {
+    var form = document.getElementById('createTeamForm');
+    var isVisible = form.style.display !== 'none';
+    form.style.display = isVisible ? 'none' : 'block';
+    if (!isVisible) {
+        // Заполняем список задач
+        populateTeamTasks();
+    }
+}
+
+async function populateTeamTasks() {
+    var sel = document.getElementById('teamTaskId');
+    try {
+        var r = await fetch(API_URL + '/api/tasks', { headers: authHeaders() });
+        var tasks = await r.json();
+        sel.innerHTML = '<option value="">— Привязать к задаче (необязательно) —</option>';
+        if (Array.isArray(tasks)) {
+            for (var i = 0; i < tasks.length; i++) {
+                sel.innerHTML += '<option value="' + tasks[i].id + '">' + escapeHtml(tasks[i].title) + '</option>';
+            }
+        }
+    } catch(e) {}
+}
+
+// Создание команды
+async function createTeam() {
+    var name    = document.getElementById('teamName').value.trim();
+    var desc    = document.getElementById('teamDesc').value.trim();
+    var taskId  = document.getElementById('teamTaskId').value;
+    var maxSize = document.getElementById('teamMaxSize').value;
+
+    if (!name) { showToast('Введите название команды', false); return; }
+
+    var body = { name: name, description: desc };
+    if (taskId)  body.task_id  = parseInt(taskId);
+    if (maxSize) body.max_size = parseInt(maxSize);
+
+    try {
+        var r = await fetch(API_URL + '/api/teams/create', {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify(body)
+        });
+        var d = await r.json();
+        if (r.ok && (d.success || d.id)) {
+            showToast('Команда «' + name + '» создана!');
+            document.getElementById('teamName').value  = '';
+            document.getElementById('teamDesc').value  = '';
+            document.getElementById('createTeamForm').style.display = 'none';
+            loadTeams();
+        } else {
+            showToast(d.message || d.detail || 'Ошибка создания', false);
+        }
+    } catch(e) {
+        showToast('Ошибка соединения', false);
+        console.error(e);
+    }
+}
+
+// Загрузка команд
+async function loadTeams() {
+    var c = document.getElementById('teamsList');
+    c.innerHTML = '<p style="color:#6b7280;">Загрузка...</p>';
+    try {
+        // Загружаем команды и волонтёров параллельно
+        var [teamsR, volsR] = await Promise.all([
+            fetch(API_URL + '/api/teams', { headers: authHeaders() }),
+            fetch(API_URL + '/api/users',  { headers: authHeaders() })
+        ]);
+
+        teamsData = await teamsR.json().catch(() => []);
+        var allUsers = await volsR.json().catch(() => []);
+        if (!Array.isArray(teamsData)) teamsData = [];
+        volunteersData = Array.isArray(allUsers)
+            ? allUsers.filter(function(u) { return u.role === 'volunteer'; })
+            : [];
+
+        if (!teamsData.length) {
+            c.innerHTML = '<div class="empty-state">👥 Нет команд. Создайте первую!</div>';
+            return;
+        }
+
+        var html = '';
+        for (var i = 0; i < teamsData.length; i++) {
+            var team = teamsData[i];
+            var members = team.members || [];
+            var maxSize = team.max_size || '∞';
+
+            // Чипы участников
+            var membersHtml = '';
+            for (var j = 0; j < members.length; j++) {
+                var m = members[j];
+                membersHtml += '<div class="member-chip">' +
+                    '👤 ' + escapeHtml(m.name || m.email || 'Волонтёр') +
+                    ' <button onclick="removeMember(' + team.id + ',' + m.id + ')" title="Удалить">✕</button>' +
+                    '</div>';
+            }
+            if (!membersHtml) membersHtml = '<span style="color:#6b7280;font-size:13px;">Нет участников</span>';
+
+            // Селект для добавления волонтёра
+            var memberIds = members.map(function(m) { return m.id; });
+            var selectOpts = '<option value="">— Выбрать волонтёра —</option>';
+            for (var v = 0; v < volunteersData.length; v++) {
+                var vol = volunteersData[v];
+                if (memberIds.indexOf(vol.id) === -1) {
+                    selectOpts += '<option value="' + vol.id + '">' +
+                        escapeHtml(vol.name || vol.email) + '</option>';
+                }
+            }
+
+            html += '<div class="team-card" id="team-' + team.id + '">' +
+                '<div class="team-card-header">' +
+                    '<div>' +
+                        '<div class="team-name">👥 ' + escapeHtml(team.name) + '</div>' +
+                        '<div class="team-meta">' +
+                            (team.description ? escapeHtml(team.description) + ' · ' : '') +
+                            'Участников: ' + members.length + ' / ' + maxSize +
+                            (team.task_title ? ' · Задача: ' + escapeHtml(team.task_title) : '') +
+                        '</div>' +
+                    '</div>' +
+                    '<button class="btn-danger-small" onclick="deleteTeam(' + team.id + ')">🗑 Удалить</button>' +
+                '</div>' +
+
+                // Статистика команды
+                '<div class="team-stats">' +
+                    '<div class="team-stat"><div class="team-stat-num">' + members.length + '</div><div class="team-stat-lbl">Участников</div></div>' +
+                    '<div class="team-stat"><div class="team-stat-num">' + maxSize + '</div><div class="team-stat-lbl">Макс.</div></div>' +
+                '</div>' +
+
+                // Участники
+                '<div style="margin-top:14px;">' +
+                    '<div style="font-size:13px;font-weight:600;color:#4a5b6e;margin-bottom:8px;">УЧАСТНИКИ</div>' +
+                    '<div class="team-members">' + membersHtml + '</div>' +
+                '</div>' +
+
+                // Набор в команду
+                '<div style="margin-top:14px;">' +
+                    '<div style="font-size:13px;font-weight:600;color:#4a5b6e;margin-bottom:8px;">ДОБАВИТЬ УЧАСТНИКА</div>' +
+                    '<div class="add-member-row">' +
+                        '<select id="vol-select-' + team.id + '">' + selectOpts + '</select>' +
+                        '<button class="btn-purple" onclick="addMember(' + team.id + ')">➕ Добавить</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+        c.innerHTML = html;
+    } catch(e) {
+        c.innerHTML = '<p style="color:#dc2626;">Ошибка загрузки команд</p>';
+        console.error(e);
+    }
+}
+
+// Добавить участника в команду
+async function addMember(teamId) {
+    var sel = document.getElementById('vol-select-' + teamId);
+    var userId = sel.value;
+    if (!userId) { showToast('Выберите волонтёра', false); return; }
+
+    try {
+        var r = await fetch(API_URL + '/api/teams/' + teamId + '/members', {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({ user_id: parseInt(userId) })
+        });
+        var d = await r.json();
+        if (r.ok && (d.success || d.id)) {
+            showToast('Волонтёр добавлен в команду!');
+            loadTeams();
+        } else {
+            showToast(d.message || d.detail || 'Ошибка', false);
+        }
+    } catch(e) { showToast('Ошибка соединения', false); }
+}
+
+// Удалить участника из команды
+async function removeMember(teamId, userId) {
+    if (!confirm('Удалить участника из команды?')) return;
+    try {
+        var r = await fetch(API_URL + '/api/teams/' + teamId + '/members/' + userId, {
+            method: 'DELETE',
+            headers: authHeaders()
+        });
+        var d = await r.json();
+        if (r.ok) { showToast('Участник удалён'); loadTeams(); }
+        else showToast(d.message || 'Ошибка', false);
+    } catch(e) { showToast('Ошибка соединения', false); }
+}
+
+// Удалить команду
+async function deleteTeam(teamId) {
+    if (!confirm('Удалить команду?')) return;
+    try {
+        var r = await fetch(API_URL + '/api/teams/' + teamId, {
+            method: 'DELETE',
+            headers: authHeaders()
+        });
+        var d = await r.json();
+        if (r.ok) { showToast('Команда удалена'); loadTeams(); }
+        else showToast(d.message || 'Ошибка', false);
+    } catch(e) { showToast('Ошибка соединения', false); }
+}
 </script>
 </body>
 </html>
